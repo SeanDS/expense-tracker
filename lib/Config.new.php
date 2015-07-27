@@ -8,6 +8,9 @@ class Config {
   const TABLE_PREFIX      = '';
   
   const DOCUMENT_ROOT     = '/var/www/';
+  
+  const MINIMUM_USERNAME_LENGTH =   3;
+  const MAXIMUM_USERNAME_LENGTH =   32;
 }
 
 ?>
