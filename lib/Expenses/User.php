@@ -8,13 +8,13 @@ use PDO;
 use Exception;
 use DateTime;
 use DateTimeZone;
-
 use InvalidArgumentException;
+
 use Expenses\InvalidCredentialsException;
 
 class User extends AbstractSingular
 {
-    protected $attributeTypes = array(
+    protected static $attributeTypes = array(
         'userid'    =>  PDO::PARAM_INT,
         'username'  =>  PDO::PARAM_STR,
         'password'  =>  PDO::PARAM_STR,
@@ -54,9 +54,9 @@ class User extends AbstractSingular
             VALUES (:username, :password, :salt, NOW())
         ");
         
-        $newUserQuery->bindParam(':username', $data['username'], PDO::PARAM_STR);
-        $newUserQuery->bindParam(':password', $password, PDO::PARAM_STR);
-        $newUserQuery->bindParam(':salt', $salt, PDO::PARAM_STR);
+        $newUserQuery->bindParam(':username', $data['username'], self::$attributeTypes['username']);
+        $newUserQuery->bindParam(':password', $password, self::$attributeTypes['password']);
+        $newUserQuery->bindParam(':salt', $salt, self::$attributeTypes['salt']);
         
         $newUserQuery->execute();
         

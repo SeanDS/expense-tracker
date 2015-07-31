@@ -3,6 +3,7 @@
 namespace Expenses;
 
 use PDO;
+use DateTime;
 
 use Config;
 use InvalidArgumentException;
@@ -10,7 +11,7 @@ use NotLoadedException;
 
 /**
  * Description
- *
+ *a
  * @author sean
  */
 abstract class AbstractSingular
@@ -19,7 +20,6 @@ abstract class AbstractSingular
     private $table;
     private $idColumn;
     
-    protected $attributeTypes = array();
     protected $attributes = array();
     
     private $loaded = false;
@@ -60,7 +60,7 @@ abstract class AbstractSingular
         $table = Config::TABLE_PREFIX . $this->table;
 
         // list of columns to select
-        $columns = array_keys($this->attributeTypes);
+        $columns = array_keys(static::$attributeTypes);
 
         // full expression
         $sql = "
@@ -87,7 +87,7 @@ abstract class AbstractSingular
 
         // bind columns to attributes
         foreach ($columns as $column) {
-            $query->bindColumn($columnCount, $this->attributes[$column], $this->attributeTypes[$column]);
+            $query->bindColumn($columnCount, $this->attributes[$column], static::$attributeTypes[$column]);
 
             $columnCount++;
         }
@@ -199,6 +199,21 @@ abstract class AbstractSingular
         $query->fetch(PDO::FETCH_BOUND);
         
         return (bool) $exists;
+    }
+    
+    /**
+     * 
+     * 
+     * From http://stackoverflow.com/questions/19271381/correctly-determine-if-date-string-is-a-valid-date-in-that-format
+     * 
+     * @param type $dateString
+     * @return type
+     */
+    public static function validateDateString($dateString)
+    {
+        $date = DateTime::createFromFormat(DB_DATE_FORMAT, $dateString);
+        
+        return $date && $date->format(DB_DATE_FORMAT) == $dateString;
     }
     
     /**

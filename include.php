@@ -1,6 +1,13 @@
 <?php
 
+// constants
+define('DB_DATE_FORMAT', 'Y-m-d H:i:s');
+
+// configuration settings
 require('lib/Config.php');
+
+// libraries
+require('vendor/autoload.php');
 
 // define some primary error handling functions
 function errorHandler($errno, $errstr, $errfile, $errline, $context = null) {
@@ -56,14 +63,10 @@ set_exception_handler('exceptionHandler');
 register_shutdown_function('fatalErrorHandler');
 
 /*
- * Register class autoloader
+ * Create the template engine
  */
 
-require('lib/Autoload.php');
-
-// expenses autoloader
-$autoloader = new Autoload('Expenses', Config::DOCUMENT_ROOT . 'lib');
-$autoloader->register();
+$templates = new League\Plates\Engine('templates');
 
 /*
  * Create database connection function

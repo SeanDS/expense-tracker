@@ -1,0 +1,8 @@
+{
+    "autoload": {
+        "psr-4": {"Expenses\\": "lib/Expenses/"}
+    },
+    "require": {
+        "league/plates": "3.*"
+    }
+}
