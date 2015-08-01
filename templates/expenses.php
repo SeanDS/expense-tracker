@@ -2,6 +2,7 @@
     <thead>
         <th>Date</th>
         <th>Type</th>
+        <th>Amount</th>
         <th>Location</th>
     </thead>
     <tbody>
@@ -9,8 +10,9 @@
         <?php foreach($expenses->get() as $expense): ?>
         <tr>
             <td><?=$expense->getDate($user, false)?></td>
-            <td>type</td>
-            <td>location</td>
+            <td><?=$expense->getType()->getAttribute('name')?></td>
+            <td>£<?=$expense->getAttribute('amount')?></td>
+            <td><?=$expense->getLocation()->getAddress()?></td>
         </tr>
         <?php endforeach; ?>
     <?php else: ?>

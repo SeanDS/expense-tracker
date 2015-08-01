@@ -86,6 +86,20 @@ class Expense extends AbstractSingular {
         return $user->formatDate($this->getAttribute('date'), $descriptive);
     }
     
+    public function getType() {
+        $type = new Type($this->getAttribute('typeid'));
+        $type->load();
+        
+        return $type;
+    }
+    
+    public function getLocation() {
+        $location = new Location($this->getAttribute('locationid'));
+        $location->load();
+        
+        return $location;
+    }
+    
     public static function validateAmount($amount) {        
         return (
             (floatval($amount) >= 0)
