@@ -14,32 +14,20 @@ use NotLoadedException;
  *a
  * @author sean
  */
-abstract class AbstractSingular
+abstract class AbstractSingular extends AbstractEntity
 {
     private $id;
-    private $table;
-    private $idColumn;
     
     protected $attributes = array();
-    
-    private $loaded = false;
 
-    public function __construct($table, $idColumn, $id)
+    public function __construct($id)
     {
-        if (! self::validateTableName($table)) {
-            throw new InvalidArgumentException("The specified table is invalid.");
-        }
-        
-        if (! self::validateColumnName($idColumn, $table)) {
-            throw new InvalidArgumentException("The specified id column is invalid.");
-        }
+        parent::__construct();
         
         if (! self::validateId($id)) {
             throw new InvalidArgumentException("The specified id is invalid.");
         }
         
-        $this->table = $table;
-        $this->idColumn = $idColumn;
         $this->id = $id;
     }
     
@@ -56,8 +44,6 @@ abstract class AbstractSingular
         /*
          * create and execute SQL query
          */
-        
-        $table = Config::TABLE_PREFIX . $this->table;
 
         // list of columns to select
         $columns = array_keys(static::$attributeTypes);
@@ -65,8 +51,8 @@ abstract class AbstractSingular
         // full expression
         $sql = "
             SELECT " . implode(", ", $columns) . "
-            FROM " . $table . "
-            WHERE " . $this->idColumn . " = :id
+            FROM " . Config::TABLE_PREFIX . static::$table . "
+            WHERE " . static::$idColumn . " = :id
         ";
 
         // prepare statement
@@ -96,20 +82,18 @@ abstract class AbstractSingular
         if ($query->fetch(PDO::FETCH_BOUND)) {
             // set loaded
             $this->setLoaded(true);
-
-            return true;
         } else {
-            throw new ObjectNotFoundException($this->table, $this->idColumn, $this->id);
+            throw new ObjectNotFoundException(static::$table, static::$idColumn, $this->id);
         }
     }
     
-    public function isLoaded()
-    {
-        return $this->loaded;
-    }
-    
-    public function setLoaded($loaded) {
-        $this->loaded = boolval($loaded);
+    public static function fromAttributes($id, $attributes) {
+        $cls = static::class;
+        
+        $obj = new $cls($id);
+        $obj->setAttributes($attributes);
+        
+        return $obj;
     }
     
     public function getId() {
@@ -120,102 +104,6 @@ abstract class AbstractSingular
         return $this->id;
     }
     
-    public static function idExists($id, $table)
-    {
-        global $db;
-        
-        if (! self::validateId($id)) {
-            throw new InvalidArgumentException("Specified id is invalid.");
-        }
-        
-        if (! self::validateTableName($table)) {
-            throw new InvalidArgumentException("Specified table is invalid.");
-        }
-
-        $existsQuery = $db->prepare("
-            SELECT EXISTS(SELECT 1 FROM " . $table . " WHERE userid = ?)
-        ");
-
-        $existsQuery->bindParam(1, $id, PDO::PARAM_INT);
-        $existsQuery->execute();
-
-        $existsQuery->bindColumn(1, $exists);
-        $existsQuery->fetch();
-
-        return (bool) $exists;
-    }
-    
-    public static function validateTableName($table) {
-        global $db;
-        
-        $table = Config::TABLE_PREFIX . $table;
-        $database = Config::DATABASE_NAME;
-        
-        $query = $db->prepare("
-            SELECT EXISTS(
-                SELECT 1
-                FROM INFORMATION_SCHEMA.TABLES
-                WHERE
-                    TABLE_SCHEMA = :database
-                    AND TABLE_NAME = :table
-            )
-        ");
-        
-        $query->bindParam(':database', $database, PDO::PARAM_STR);
-        $query->bindParam(':table', $table, PDO::PARAM_STR);
-        
-        $query->execute();
-        
-        $query->bindColumn(1, $exists);
-        $query->fetch(PDO::FETCH_BOUND);
-        
-        return (bool) $exists;
-    }
-    
-    public static function validateColumnName($column, $table) {
-        global $db;
-        
-        $table = Config::TABLE_PREFIX . $table;
-        $database = Config::DATABASE_NAME;
-        
-        $query = $db->prepare("
-            SELECT EXISTS(
-                SELECT 1
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE
-                    TABLE_SCHEMA = :database
-                    AND TABLE_NAME = :table
-                    AND COLUMN_NAME = :column
-            )
-        ");
-        
-        $query->bindParam(':database', $database, PDO::PARAM_STR);
-        $query->bindParam(':table', $table, PDO::PARAM_STR);
-        $query->bindParam(':column', $column, PDO::PARAM_STR);
-        
-        $query->execute();
-        
-        $query->bindColumn(1, $exists);
-        $query->fetch(PDO::FETCH_BOUND);
-        
-        return (bool) $exists;
-    }
-    
-    /**
-     * 
-     * 
-     * From http://stackoverflow.com/questions/19271381/correctly-determine-if-date-string-is-a-valid-date-in-that-format
-     * 
-     * @param type $dateString
-     * @return type
-     */
-    public static function validateDateString($dateString)
-    {
-        $date = DateTime::createFromFormat(DB_DATE_FORMAT, $dateString);
-        
-        return $date && $date->format(DB_DATE_FORMAT) == $dateString;
-    }
-    
     /**
      * Checks whether the specified attribute exists.
      * 
@@ -224,7 +112,7 @@ abstract class AbstractSingular
      */
     public function attributeExists($attribute)
     {        
-        return array_key_exists($attribute, $this->attributes);
+        return array_key_exists($attribute, static::$attributeTypes);
     }
     
     /**
@@ -255,6 +143,8 @@ abstract class AbstractSingular
      */
     public function setAttribute($attribute, $value, $save = false)
     {
+        // FIXME: validate attributes (setAttributes() below doesn't do so)
+        
         if ($this->attributeExists($attribute)) {
             // save new value
             $this->attributes[$attribute] = $value;
@@ -269,19 +159,22 @@ abstract class AbstractSingular
         }
     }
     
-    public static function validateId($id)
-    {
-        $valid = filter_var(
-            $id,
-            FILTER_VALIDATE_INT,
-            array(
-                'options'   =>  array(
-                    'min_range' =>  1
-                )
-            )
-        );
-
-        return ($valid === false) ? false : true;
+    public function setAttributes($attributes) {
+        if (! is_array($attributes)) {
+            throw new InvalidArgumentException("Specified attributes argument is not an array.");
+        }
+        
+        // clear the attributes
+        $this->attributes = array();
+        
+        // extract only proper attributes
+        foreach (array_keys(static::$attributeTypes) as $attribute) {
+            if (! key_exists($attribute, $attributes)) {
+                throw new InvalidArgumentException(sprintf("Specified attributes do not contain the key %s.", $attribute));
+            }
+            
+            $this->setAttribute($attribute, $attributes[$attribute]);
+        }
     }
 }
 

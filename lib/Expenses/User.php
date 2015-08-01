@@ -14,18 +14,17 @@ use Expenses\InvalidCredentialsException;
 
 class User extends AbstractSingular
 {
-    protected static $attributeTypes = array(
-        'userid'    =>  PDO::PARAM_INT,
-        'username'  =>  PDO::PARAM_STR,
-        'password'  =>  PDO::PARAM_STR,
-        'salt'      =>  PDO::PARAM_STR,
-        'lastlogin' =>  PDO::PARAM_STR
+    public static $attributeTypes = array(
+        'userid'        =>  PDO::PARAM_INT,
+        'username'      =>  PDO::PARAM_STR,
+        'password'      =>  PDO::PARAM_STR,
+        'salt'          =>  PDO::PARAM_STR,
+        'dateformat'    =>  PDO::PARAM_STR,
+        'lastlogin'     =>  PDO::PARAM_STR
     );
     
-    public function __construct($userId)
-    {
-        parent::__construct('users', 'userid', $userId);
-    }
+    public static $table = 'users';
+    public static $idColumn = 'userid';
     
     public static function fromUsername($username) {
         return new self(self::getUserIdFromUsername($username));
@@ -49,14 +48,17 @@ class User extends AbstractSingular
         $salt = self::createSalt();
         $password = self::createPasswordHash($data['password'], $salt);
         
+        $dateFormat = 'Y-m-d H:i:s';
+        
         $newUserQuery = $db->prepare("
-            INSERT INTO " . Config::TABLE_PREFIX . "users (username, password, salt, lastlogin)
+            INSERT INTO " . Config::TABLE_PREFIX . "users (username, password, salt, dateformat, lastlogin)
             VALUES (:username, :password, :salt, NOW())
         ");
         
         $newUserQuery->bindParam(':username', $data['username'], self::$attributeTypes['username']);
         $newUserQuery->bindParam(':password', $password, self::$attributeTypes['password']);
         $newUserQuery->bindParam(':salt', $salt, self::$attributeTypes['salt']);
+        $newUserQuery->bindParam(':dateformat', $dateFormat, self::$attributeTypes['dateformat']);
         
         $newUserQuery->execute();
         
@@ -87,7 +89,7 @@ class User extends AbstractSingular
     
     public function updateLastLogin()
     {
-        $this->setAttribute('lastlogin', date('Y-m-d H:i:s'), true);
+        $this->setAttribute('lastlogin', date(DB_DATE_FORMAT), true);
     }
     
     public static function validateUsername($username) {
@@ -110,7 +112,7 @@ class User extends AbstractSingular
         }
 
         $usernameExistsQuery = $db->prepare("
-            SELECT EXISTS(SELECT 1 FROM " . Config::TABLE_PREFIX . "users WHERE username = :username)
+            SELECT EXISTS(SELECT 1 FROM " . Config::TABLE_PREFIX . static::$table . " WHERE username = :username)
         ");
 
         $usernameExistsQuery->bindParam(':username', $username, PDO::PARAM_STR);
@@ -140,14 +142,14 @@ class User extends AbstractSingular
         }
         
         $userIdQuery = $db->prepare("
-            SELECT userid
-            FROM " . Config::TABLE_PREFIX . "users
+            SELECT " . static::$idColumn . "
+            FROM " . Config::TABLE_PREFIX . static::$table . "
             WHERE username = :username
         ");
         
         $userIdQuery->bindParam(":username", $username, PDO::PARAM_STR);
         $userIdQuery->execute();
-        $userIdQuery->bindColumn('userid', $userId, PDO::PARAM_INT);
+        $userIdQuery->bindColumn(static::$idColumn, $userId, PDO::PARAM_INT);
         $userIdQuery->fetch(PDO::FETCH_BOUND);
         
         if (! self::validateId($userId)) {
@@ -163,7 +165,7 @@ class User extends AbstractSingular
         $credentialQuery = $db->prepare("
             SELECT EXISTS(
                 SELECT 1
-                FROM " . Config::TABLE_PREFIX . "users
+                FROM " . Config::TABLE_PREFIX . static::$table . "
                 WHERE
                     username = :username AND
                     password = SHA2(CONCAT(salt, :password), 512)
@@ -182,12 +184,14 @@ class User extends AbstractSingular
     }
 
     // $nonDescriptiveFormat is only used if $descriptive is false
-    public function formatDate($timestamp, $descriptive = true, $nonDescriptiveFormat = 'Y-m-d')
-    {
+    public function formatDate($dateString, $descriptive = true) {
+        $timestamp = strtotime($dateString);
+        
+        // TODO: use user timezone
         $timezone = new DateTimeZone('Europe/London');
     
         $now = new DateTime("now", $timezone);
-        $time = new DateTime("@" . intval($timestamp), $timezone);
+        $time = new DateTime("@" . $timestamp, $timezone);
 
         if ($descriptive) {
             if($timestamp == 0) {
@@ -253,7 +257,7 @@ class User extends AbstractSingular
                 }
             }
         } else {
-            return gmdate($nonDescriptiveFormat, $timestamp);
+            return gmdate($this->getAttribute('dateformat'), $timestamp);
         }
     }
     

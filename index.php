@@ -13,18 +13,18 @@ use Expenses\User;
 
 $user = User::login("sean", "test");
 
-use Expenses\Expense;
+use Expenses\ExpenseGroup;
 
-class Expenses {
-    function getCount() {
-        return 0;
-    }
-}
+$expenses = new ExpenseGroup();
+$expenses->load();
 
-$expenses = new Expenses();
+// global user
+$templates->addData(['user' => $user]);
 
-$templates->addData(['username' => $user->getAttribute('username')]);
+// page title for template
 $templates->addData(['title' => 'Index'], ['template']);
+
+// expenses
 $templates->addData(['expenses' => $expenses], ['expenses']);
 
 echo $templates->render('index');

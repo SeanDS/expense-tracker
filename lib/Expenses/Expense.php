@@ -9,7 +9,7 @@ use Exception;
 use InvalidArgumentException;
 
 class Expense extends AbstractSingular {
-    protected static $attributeTypes = array(
+    public static $attributeTypes = array(
         'expenseid'     =>  PDO::PARAM_INT,
         'date'          =>  PDO::PARAM_STR,
         'typeid'        =>  PDO::PARAM_INT,
@@ -17,11 +17,9 @@ class Expense extends AbstractSingular {
         'amount'        =>  PDO::PARAM_STR,
         'comment'       =>  PDO::PARAM_STR
     );
-
-    public function __construct($expenseId)
-    {
-        parent::__construct('expenses', 'expenseid', $expenseId);
-    }
+    
+    public static $table = 'expenses';
+    public static $idColumn = 'expenseid';
     
     public static function create($data) {
         global $db;
@@ -59,7 +57,7 @@ class Expense extends AbstractSingular {
         }
         
         $newExpenseQuery = $db->prepare("
-            INSERT INTO " . Config::TABLE_PREFIX . "expenses (date, typeid, locationid, amount, comment)
+            INSERT INTO " . Config::TABLE_PREFIX . static::$table . " (date, typeid, locationid, amount, comment)
             VALUES (:date, :typeid, :locationid, :amount, :comment)
         ");
         
@@ -83,11 +81,14 @@ class Expense extends AbstractSingular {
         return $expense;
     }
     
-    public static function validateAmount($amount) {
-        $amount = floatval($amount);
-        
+    public function getDate($user, $descriptive = true) {
+        // TODO: check user is valid object
+        return $user->formatDate($this->getAttribute('date'), $descriptive);
+    }
+    
+    public static function validateAmount($amount) {        
         return (
-            ($amount >= 0)
+            (floatval($amount) >= 0)
         );
     }
     

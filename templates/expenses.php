@@ -5,10 +5,10 @@
         <th>Location</th>
     </thead>
     <tbody>
-    <?php if ($expenses->getCount() > 0): ?>
-        <?php foreach($expenses as $expense): ?>
+    <?php if ($expenses->count() > 0): ?>
+        <?php foreach($expenses->get() as $expense): ?>
         <tr>
-            <td>date</td>
+            <td><?=$expense->getDate($user, false)?></td>
             <td>type</td>
             <td>location</td>
         </tr>
