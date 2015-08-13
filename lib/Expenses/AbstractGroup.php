@@ -2,9 +2,9 @@
 
 namespace Expenses;
 
-use PDO;
-use Closure;
-use InvalidArgumentException;
+use \PDO;
+use \Closure;
+use \InvalidArgumentException;
 
 use Config;
 
@@ -355,10 +355,6 @@ abstract class AbstractGroup extends AbstractEntity
         if ($valid === false) {
             throw new InvalidArgumentException("Specified row limit is invalid.");
         }
-    }
-    
-    public static function getTableColumnIdentifier($table, $column) {
-        return ":" . $table . "__" . $column;
     }
 }
 

@@ -9,11 +9,11 @@ use \Exception;
  *
  * @author sean
  */
-class InvalidCredentialsException extends Exception
+class NoRowsAffectedException extends Exception
 {
     public function __construct()
     {
-        parent::__construct("Specified credentials are invalid.");
+        parent::__construct("No rows affected.");
     }
 }
 

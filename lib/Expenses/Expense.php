@@ -2,11 +2,11 @@
 
 namespace Expenses;
 
-use Config;
+use \PDO;
+use \Exception;
+use \InvalidArgumentException;
 
-use PDO;
-use Exception;
-use InvalidArgumentException;
+use Config;
 
 class Expense extends AbstractSingular {
     public static $attributeTypes = array(

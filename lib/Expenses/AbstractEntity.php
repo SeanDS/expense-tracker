@@ -2,8 +2,8 @@
 
 namespace Expenses;
 
-use InvalidArgumentException;
-use DateTime;
+use \DateTime;
+use \InvalidArgumentException;
 
 use Expenses\NotLoadedException;
 
@@ -159,6 +159,10 @@ abstract class AbstractEntity
         }
 
         return $arr;
+    }
+    
+    public static function getTableColumnIdentifier($table, $column) {
+        return ":" . $table . "__" . $column;
     }
 }
 

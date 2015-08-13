@@ -93,4 +93,18 @@ try {
     echo "Error connecting to database";
 }
 
+/*
+ * Filter the $_GET['do'] parameter
+ */
+
+$do = filter_input(INPUT_GET, 'do', FILTER_SANITIZE_STRING);
+
+/*
+ * Load user
+ */
+
+use Expenses\User;
+
+$user = User::login("sean", "test");
+
 ?>

@@ -2,12 +2,10 @@
 
 namespace Expenses;
 
-use PDO;
-use DateTime;
+use \PDO;
+use \InvalidArgumentException;
 
 use Config;
-use InvalidArgumentException;
-use NotLoadedException;
 
 /**
  * Description
@@ -33,9 +31,76 @@ abstract class AbstractSingular extends AbstractEntity
     
     public static abstract function create($data);
     
-    public function save($attribute = null) {
+    /**
+     * 
+     * @global type $db
+     * @param type $attribute
+     * @param type $checkRowCount   Check whether any rows were affected and throw an error if not
+     * @throws NotLoadedException
+     * @throws Exception
+     * @throws NoRowsAffectedException
+     */
+    public function save($attribute = null, $checkRowCount = false) {        
+        global $db;
+
+        if (! $this->isLoaded()) {
+            throw new NotLoadedException();
+        }
+        
         // $attribute specifies the attribute to save
         // null means save all
+        if (is_null($attribute)) {
+            $attributes = array_keys($this->attributes);
+        } else {
+            if (! in_array($attribute, array_keys(static::$attributeTypes))) {
+                throw new Exception('Specified attribute is not valid.');
+            }
+            
+            $attributes = array($attribute);
+        }
+
+        // start a transaction
+        $db->beginTransaction();
+
+        /*
+         * Update table
+         */
+
+        $columns = array();
+
+        foreach ($attributes as $attribute) {
+            $columns[] = $attribute . " = " . self::getTableColumnIdentifier(static::$table, $attribute);
+        }
+
+        $sql = "UPDATE " . static::$table . " SET " . implode(', ', $columns) . " WHERE " . static::$idColumn . " = " . self::getTableColumnIdentifier(static::$table, static::$idColumn);
+
+        $tableQuery = $db->prepare($sql);
+
+        foreach ($attributes as $attribute) {
+            $tableQuery->bindValue(self::getTableColumnIdentifier(static::$table, $attribute), $this->getAttribute($attribute), static::$attributeTypes[$attribute]);
+        }
+
+        // set WHERE clause
+        $tableQuery->bindParam(self::getTableColumnIdentifier(static::$table, static::$idColumn), $this->getAttribute(static::$idColumn), static::$attributeTypes[static::$idColumn]);
+
+        $tableQuery->execute();
+
+        if($checkRowCount && $tableQuery->rowCount() === 0) {
+            // no rows were affected, so the object doesn't exist
+            // TODO: this can also be caused by an invalid value resulting in
+            // no affected rows (e.g. trying to set a float field to 1,25)
+
+            // roll back
+            $db->rollBack();
+
+            // throw exception
+            throw new NoRowsAffectedException();
+        }
+
+        $tableQuery->closeCursor();
+
+        // everything seems to have worked, so commit the transaction
+        $db->commit();
     }
     
     public function load() {

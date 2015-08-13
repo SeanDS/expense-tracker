@@ -2,12 +2,11 @@
 
 namespace Expenses;
 
+use \PDO;
+use \Exception;
+use \InvalidArgumentException;
+
 use Config;
-
-use PDO;
-use Exception;
-use InvalidArgumentException;
-
 use Expenses\InvalidCredentialsException;
 
 class Location extends AbstractSingular

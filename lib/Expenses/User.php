@@ -2,14 +2,13 @@
 
 namespace Expenses;
 
+use \PDO;
+use \Exception;
+use \DateTime;
+use \DateTimeZone;
+use \InvalidArgumentException;
+
 use Config;
-
-use PDO;
-use Exception;
-use DateTime;
-use DateTimeZone;
-use InvalidArgumentException;
-
 use Expenses\InvalidCredentialsException;
 
 class User extends AbstractSingular

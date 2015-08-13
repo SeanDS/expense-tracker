@@ -2,7 +2,7 @@
 
 namespace Expenses;
 
-use Exception;
+use \Exception;
 
 /**
  * Description of NotLoadedException
