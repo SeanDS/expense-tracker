@@ -2,7 +2,6 @@
 
 namespace Expenses;
 
-use \PDO;
 use \Exception;
 use \InvalidArgumentException;
 
@@ -12,9 +11,9 @@ use Expenses\InvalidCredentialsException;
 class Location extends AbstractSingular
 {
     public static $attributeTypes = array(
-        'locationid'    =>  PDO::PARAM_INT,
-        'organisation'  =>  PDO::PARAM_STR,
-        'address'       =>  PDO::PARAM_STR
+        'locationid'    =>  ExpensesPDO::PARAM_INT,
+        'organisation'  =>  ExpensesPDO::PARAM_STR,
+        'address'       =>  ExpensesPDO::PARAM_STR
     );
     
     public static $table = 'locations';

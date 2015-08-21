@@ -72,12 +72,12 @@ $templates = new League\Plates\Engine('templates');
  * Create database connection function
  */
 
-use \PDO;
+use Expenses\ExpensesPDO;
 use \PDOException;
 
 try {
     // create the database connection
-    $db = new PDO(
+    $db = new ExpensesPDO(
         "mysql:host=" . Config::DATABASE_SERVER . ";dbname=" . Config::DATABASE_NAME,
         Config::DATABASE_USERNAME,
         Config::DATABASE_PASSWORD,
@@ -106,5 +106,8 @@ $do = filter_input(INPUT_GET, 'do', FILTER_SANITIZE_STRING);
 use Expenses\User;
 
 $user = User::login("sean", "test");
+
+// add user to template
+$templates->addData(['user' => $user]);
 
 ?>

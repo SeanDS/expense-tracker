@@ -2,8 +2,6 @@
 
 namespace Expenses;
 
-use \PDO;
-use \Closure;
 use \InvalidArgumentException;
 
 use Config;
@@ -220,7 +218,7 @@ abstract class AbstractGroup extends AbstractEntity
         }
         
         // fetch results and put into attributes
-        while ($query->fetch(PDO::FETCH_BOUND)) {            
+        while ($query->fetch(ExpensesPDO::FETCH_BOUND)) {            
             $id = $attributes[$obj::$idColumn];
 
             // this is a nasty hack to copy the attributes by value, else every
@@ -239,7 +237,7 @@ abstract class AbstractGroup extends AbstractEntity
             $rowCountQuery = $db->prepare("SELECT FOUND_ROWS()");
             $rowCountQuery->execute();
             $rowCountQuery->bindColumn(1, $this->rowCount);
-            $rowCountQuery->fetch(PDO::FETCH_BOUND);
+            $rowCountQuery->fetch(ExpensesPDO::FETCH_BOUND);
             $rowCountQuery->closeCursor();
         }
     }
@@ -264,11 +262,11 @@ abstract class AbstractGroup extends AbstractEntity
         $obj = static::$objectClass;
         
         foreach ($whereCriteria as $criterion) {  
-            if (! array_key_exists('column', $criterion) && ! self::validateColumnName($criterion['column'], $obj::$table)) {
+            if (! array_key_exists('column', $criterion) || ! self::validateColumnName($criterion['column'], $obj::$table)) {
                 throw new InvalidArgumentException("A specified column is invalid.");
             }
 
-            if (! array_key_exists('operator', $criterion) && ! self::validateOperator($criterion['operator'])) {
+            if (! array_key_exists('operator', $criterion) || ! self::validateOperator($criterion['operator'])) {
                 throw new InvalidArgumentException("A specified operator is invalid.");
             }
             
@@ -287,11 +285,11 @@ abstract class AbstractGroup extends AbstractEntity
         $obj = static::$objectClass;
         
         foreach ($orderBy as $order) {
-            if (! array_key_exists('column', $order) && ! self::validateColumnName($order['column'], $obj::$table)) {
+            if (! array_key_exists('column', $order) || ! self::validateColumnName($order['column'], $obj::$table)) {
                 throw new InvalidArgumentException("A specified column is invalid.");
             }
 
-            if (! array_key_exists('direction', $order) && ! self::validateDirection($order['direction'])) {
+            if (! array_key_exists('direction', $order) || ! self::validateDirection($order['direction'])) {
                 throw new InvalidArgumentException("A specified direction is invalid.");
             }
         }

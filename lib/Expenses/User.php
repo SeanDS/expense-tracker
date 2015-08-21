@@ -2,7 +2,6 @@
 
 namespace Expenses;
 
-use \PDO;
 use \Exception;
 use \DateTime;
 use \DateTimeZone;
@@ -14,12 +13,12 @@ use Expenses\InvalidCredentialsException;
 class User extends AbstractSingular
 {
     public static $attributeTypes = array(
-        'userid'        =>  PDO::PARAM_INT,
-        'username'      =>  PDO::PARAM_STR,
-        'password'      =>  PDO::PARAM_STR,
-        'salt'          =>  PDO::PARAM_STR,
-        'dateformat'    =>  PDO::PARAM_STR,
-        'lastlogin'     =>  PDO::PARAM_STR
+        'userid'        =>  ExpensesPDO::PARAM_INT,
+        'username'      =>  ExpensesPDO::PARAM_STR,
+        'password'      =>  ExpensesPDO::PARAM_STR,
+        'salt'          =>  ExpensesPDO::PARAM_STR,
+        'dateformat'    =>  ExpensesPDO::PARAM_STR,
+        'lastlogin'     =>  ExpensesPDO::PARAM_STR
     );
     
     public static $table = 'users';
@@ -114,7 +113,7 @@ class User extends AbstractSingular
             SELECT EXISTS(SELECT 1 FROM " . Config::TABLE_PREFIX . static::$table . " WHERE username = :username)
         ");
 
-        $usernameExistsQuery->bindParam(':username', $username, PDO::PARAM_STR);
+        $usernameExistsQuery->bindParam(':username', $username, ExpensesPDO::PARAM_STR);
         $usernameExistsQuery->execute();
 
         $usernameExistsQuery->bindColumn(1, $exists);
@@ -146,10 +145,10 @@ class User extends AbstractSingular
             WHERE username = :username
         ");
         
-        $userIdQuery->bindParam(":username", $username, PDO::PARAM_STR);
+        $userIdQuery->bindParam(":username", $username, ExpensesPDO::PARAM_STR);
         $userIdQuery->execute();
-        $userIdQuery->bindColumn(static::$idColumn, $userId, PDO::PARAM_INT);
-        $userIdQuery->fetch(PDO::FETCH_BOUND);
+        $userIdQuery->bindColumn(static::$idColumn, $userId, ExpensesPDO::PARAM_INT);
+        $userIdQuery->fetch(ExpensesPDO::FETCH_BOUND);
         
         if (! self::validateId($userId)) {
             throw new Exception("Specified username does not exist.");
@@ -177,7 +176,7 @@ class User extends AbstractSingular
         $credentialQuery->execute();
         
         $credentialQuery->bindColumn(1, $exists);
-        $credentialQuery->fetch(PDO::FETCH_BOUND);
+        $credentialQuery->fetch(ExpensesPDO::FETCH_BOUND);
         
         return (bool) $exists;
     }

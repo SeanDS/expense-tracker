@@ -5,7 +5,7 @@ namespace Expenses;
 use \DateTime;
 use \InvalidArgumentException;
 
-use Expenses\NotLoadedException;
+use Config;
 
 /**
  * Description
@@ -60,7 +60,7 @@ abstract class AbstractEntity
             SELECT EXISTS(SELECT 1 FROM " . $table . " WHERE userid = ?)
         ");
 
-        $existsQuery->bindParam(1, $id, PDO::PARAM_INT);
+        $existsQuery->bindParam(1, $id, ExpensesPDO::PARAM_INT);
         $existsQuery->execute();
 
         $existsQuery->bindColumn(1, $exists);
@@ -85,13 +85,13 @@ abstract class AbstractEntity
             )
         ");
         
-        $query->bindParam(':database', $database, PDO::PARAM_STR);
-        $query->bindParam(':table', $table, PDO::PARAM_STR);
+        $query->bindParam(':database', $database, ExpensesPDO::PARAM_STR);
+        $query->bindParam(':table', $table, ExpensesPDO::PARAM_STR);
         
         $query->execute();
         
         $query->bindColumn(1, $exists);
-        $query->fetch(PDO::FETCH_BOUND);
+        $query->fetch(ExpensesPDO::FETCH_BOUND);
         
         return (bool) $exists;
     }
@@ -113,14 +113,14 @@ abstract class AbstractEntity
             )
         ");
         
-        $query->bindParam(':database', $database, PDO::PARAM_STR);
-        $query->bindParam(':table', $table, PDO::PARAM_STR);
-        $query->bindParam(':column', $column, PDO::PARAM_STR);
+        $query->bindParam(':database', $database, ExpensesPDO::PARAM_STR);
+        $query->bindParam(':table', $table, ExpensesPDO::PARAM_STR);
+        $query->bindParam(':column', $column, ExpensesPDO::PARAM_STR);
         
         $query->execute();
         
         $query->bindColumn(1, $exists);
-        $query->fetch(PDO::FETCH_BOUND);
+        $query->fetch(ExpensesPDO::FETCH_BOUND);
         
         return (bool) $exists;
     }

@@ -1,14 +1,14 @@
-<form action="types.php?do=edit&amp;id=<?=$this->e($type->getAttribute('typeid'))?>" method="post" class="form-horizontal">
+<form action="types.php?do=new" method="post" class="form-horizontal">
     <div class="form-group">
         <label for="name" class="control-label col-md-2">Name</label>
         <div class="col-md-10">
-            <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="<?=$this->e($type->getAttribute('name'))?>"/>
+            <input type="text" class="form-control" name="name" id="name" placeholder="Name" value=""/>
         </div>
     </div>
     <div class="form-group">
         <label for="description" class="control-label col-md-2">Description</label>
         <div class="col-md-10">
-            <textarea class="form-control" name="description" id="description" rows="3" placeholder="Description"><?=$this->e($type->getAttribute('description'))?></textarea>
+            <textarea class="form-control" name="description" id="description" rows="3" placeholder="Description"></textarea>
         </div>
     </div>
     <div class="form-group">

@@ -2,7 +2,6 @@
 
 namespace Expenses;
 
-use \PDO;
 use \InvalidArgumentException;
 
 use Config;
@@ -29,7 +28,51 @@ abstract class AbstractSingular extends AbstractEntity
         $this->id = $id;
     }
     
-    public static abstract function create($data);
+    public static function create($data) {
+        global $db;
+        
+        /*
+         * check $data has all the necessary stuff
+         */
+        
+        foreach (array_keys(static::$attributeTypes) as $attribute) {
+            if (! ($attribute === static::$idColumn)) {
+                if (! array_key_exists($attribute, $data)) {
+                    throw new InvalidArgumentException(sprintf("Specified data array must contain key %s.", $attribute));
+                }
+            }
+        }
+
+        $identifiers = array();
+        
+        foreach (array_keys(static::$attributeTypes) as $attribute) {
+            if (! ($attribute === static::$idColumn)) {
+                $identifiers[$attribute] = self::getTableColumnIdentifier(static::$table, $attribute);
+            }
+        }
+
+        $sql = "INSERT INTO " . static::$table . " (" . implode(', ', array_keys($identifiers)) . ") VALUES (" . implode(', ', $identifiers) . ")";
+        
+        $insertQuery = $db->prepare($sql);
+
+        // bind values
+        foreach ($data as $attribute => $value) {
+            // use bindValue instead of bindParam to avoid issues with pass-by-reference
+            if (! ($attribute === static::$idColumn)) {
+                $insertQuery->bindValue($identifiers[$attribute], $value, static::$attributeTypes[$attribute]);
+            }
+        }
+
+        // execute query
+        $insertQuery->execute();
+        
+        // check affected rows
+        if ($insertQuery->rowCount() === 0) {
+            throw new NoRowsAffectedException();
+        }
+        
+        return $db->lastInsertId();
+    }
     
     /**
      * 
@@ -67,9 +110,12 @@ abstract class AbstractSingular extends AbstractEntity
          */
 
         $columns = array();
+        $identifiers = array();
 
         foreach ($attributes as $attribute) {
-            $columns[] = $attribute . " = " . self::getTableColumnIdentifier(static::$table, $attribute);
+            $identifiers[$attribute] = self::getTableColumnIdentifier(static::$table, $attribute);
+            
+            $columns[] = $attribute . " = " . $identifiers[$attribute];
         }
 
         $sql = "UPDATE " . static::$table . " SET " . implode(', ', $columns) . " WHERE " . static::$idColumn . " = " . self::getTableColumnIdentifier(static::$table, static::$idColumn);
@@ -77,11 +123,11 @@ abstract class AbstractSingular extends AbstractEntity
         $tableQuery = $db->prepare($sql);
 
         foreach ($attributes as $attribute) {
-            $tableQuery->bindValue(self::getTableColumnIdentifier(static::$table, $attribute), $this->getAttribute($attribute), static::$attributeTypes[$attribute]);
+            $tableQuery->bindValue($identifiers[$attribute], $this->getAttribute($attribute), static::$attributeTypes[$attribute]);
         }
 
         // set WHERE clause
-        $tableQuery->bindParam(self::getTableColumnIdentifier(static::$table, static::$idColumn), $this->getAttribute(static::$idColumn), static::$attributeTypes[static::$idColumn]);
+        $tableQuery->bindParam(self::getTableColumnIdentifier(static::$table, static::$idColumn), $this->getId(), static::$attributeTypes[static::$idColumn]);
 
         $tableQuery->execute();
 
@@ -117,14 +163,14 @@ abstract class AbstractSingular extends AbstractEntity
         $sql = "
             SELECT " . implode(", ", $columns) . "
             FROM " . Config::TABLE_PREFIX . static::$table . "
-            WHERE " . static::$idColumn . " = :id
+            WHERE " . static::$idColumn . " = " . self::getTableColumnIdentifier(static::$table, static::$idColumn) . "
         ";
 
         // prepare statement
         $query = $db->prepare($sql);
 
-        // bind parameters
-        $query->bindParam(':id', $this->id, PDO::PARAM_INT);
+        // bind ID column
+        $query->bindParam(self::getTableColumnIdentifier(static::$table, static::$idColumn), $this->getId(), static::$attributeTypes[static::$idColumn]);
         
         // execute query
         $query->execute();
@@ -144,12 +190,42 @@ abstract class AbstractSingular extends AbstractEntity
         }
 
         // fetch results into bound attributes
-        if ($query->fetch(PDO::FETCH_BOUND)) {
+        if ($query->fetch(ExpensesPDO::FETCH_BOUND)) {
             // set loaded
             $this->setLoaded(true);
         } else {
-            throw new ObjectNotFoundException(static::$table, static::$idColumn, $this->id);
+            throw new ObjectNotFoundException(static::$table, static::$idColumn, $this->getId());
         }
+    }
+    
+    public function delete() {
+        global $db;
+        
+        if (! $this->isLoaded()) {
+            throw new NotLoadedException();
+        }
+        
+        $db->beginTransaction();
+        
+        $deleteQuery = $db->prepare("
+            DELETE FROM " . Config::TABLE_PREFIX . static::$table . "
+            WHERE " . static::$idColumn . " = " . self::getTableColumnIdentifier(static::$table, static::$idColumn) . "
+        ");
+        
+        $deleteQuery->bindParam(self::getTableColumnIdentifier(static::$table, static::$idColumn), $this->getId(), static::$attributeTypes[static::$idColumn]);
+        $deleteQuery->execute();
+        
+        if (! $deleteQuery->rowCount()) {
+            // roll back
+            $db->rollBack();
+
+            // throw exception
+            throw new NoRowsAffectedException();
+        }
+
+        $deleteQuery->closeCursor();
+        
+        $db->commit();
     }
     
     public static function fromAttributes($id, $attributes) {
@@ -157,12 +233,13 @@ abstract class AbstractSingular extends AbstractEntity
         
         $obj = new $cls($id);
         $obj->setAttributes($attributes);
+        $obj->setLoaded(true);
         
         return $obj;
     }
     
     public function getId() {
-        if (! $this->isLoaded()) {
+        if (! $this->id) {
             throw new NotLoadedException();
         }
         
