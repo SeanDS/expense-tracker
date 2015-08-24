@@ -7,6 +7,9 @@ use Expenses\ExpenseGroup;
 use Expenses\TypeGroup;
 use Expenses\LocationGroup;
 
+use \DateTime;
+use \DateInterval;
+
 if (empty($do)) {
     $get = filter_input_array(
         INPUT_GET,
@@ -15,14 +18,60 @@ if (empty($do)) {
         )
     );
     
+    /*
+     * Get recent expenses
+     */
+    
     $expenses = new ExpenseGroup();
     $expenses->load();
+    
+    /*
+     * Get expenditure
+     */
+    
+    $totals = array();
+    $userTime = new DateTime($user->getCurrentUserDate(), $user->getTimeZone());
+    
+    // today
+    $userMidnight = $userTime->setTime(0, 0, 0);
+    $todayGroup = new ExpenseGroup(
+        array(
+            array(
+                'column'    =>  'date',
+                'operator'  => ExpenseGroup::OPERATOR_GREATER_THAN_EQUALS,
+                'value'     =>  $userMidnight->format(DB_DATE_FORMAT)
+            )
+        )
+    );
+    $totals[] = array(
+        'range'     =>  'Today',
+        'amount'    =>  $todayGroup->getTotalExpenses()
+    );
+    
+    // last 24 hours
+    $userOneDayAgo = $userTime->sub(new DateInterval('P1D'));
+    $lastDayGroup = new ExpenseGroup(
+        array(
+            array(
+                'column'    =>  'date',
+                'operator'  => ExpenseGroup::OPERATOR_GREATER_THAN_EQUALS,
+                'value'     =>  $userOneDayAgo->format(DB_DATE_FORMAT)
+            )
+        )
+    );
+    $totals[] = array(
+        'range'     =>  'Last 24 hours',
+        'amount'    =>  $lastDayGroup->getTotalExpenses()
+    );
+    
+    // all time
+    $allTimeGroup = new ExpenseGroup();
+    $totals[] = array(
+        'range'     =>  'All Time',
+        'amount'    =>  $allTimeGroup->getTotalExpenses()
+    );
 
-    // expenses
-    $templates->addData(['expenses' => $expenses], ['expenses']);
-    $templates->addData(['message' => $get['message']], ['expenses-list']);
-
-    echo $templates->render('expenses');
+    echo $templates->render('expenses', ['expenses' => $expenses, 'message' => $get['message'], 'totals' => $totals]);
 } elseif ($do === 'new') {
     /*
      * Process POST data
@@ -156,6 +205,31 @@ if (empty($do)) {
         
         header('Location: index.php?message=deletesuccess');
     }
+} elseif ($do === 'view') {
+    $get = filter_input_array(
+        INPUT_GET,
+        array(
+            'id'    =>  FILTER_VALIDATE_INT
+        )
+    );
+    
+    /*
+     * Load expense
+     */
+    
+    try {
+        $expense = new Expense($get['id']);
+    } catch (InvalidArgumentException $e) {
+        exit($templates->render('error', ['message' => 'Specified ID is invalid.']));
+    }
+    
+    try {
+        $expense->load();
+    } catch (ObjectNotFoundException $e) {
+        exit($templates->render('error', ['message' => 'Specified ID not found.']));
+    }
+
+    echo $templates->render('expenses-view', ['expense' => $expense]);
 }
 
 ?>

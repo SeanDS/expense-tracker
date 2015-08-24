@@ -19,13 +19,7 @@ if (empty($do)) {
     $locations = new LocationGroup();
     $locations->load();
 
-    // page title for template
-    $templates->addData(['title' => 'Locations'], ['template']);
-
-    // locations
-    $templates->addData(['locations' => $locations, 'message' => $get['message']], ['locations-list']);
-
-    echo $templates->render('locations');
+    echo $templates->render('locations', ['locations' => $locations, 'message' => $get['message']]);
 } elseif ($do === 'new') {
     /*
      * Process POST data
@@ -213,6 +207,31 @@ if (empty($do)) {
         
         header('Location: locations.php?message=deletesuccess');
     }
+} elseif ($do === 'view') {
+    $get = filter_input_array(
+        INPUT_GET,
+        array(
+            'id'    =>  FILTER_VALIDATE_INT
+        )
+    );
+    
+    /*
+     * Load location
+     */
+    
+    try {
+        $location = new Location($get['id']);
+    } catch (InvalidArgumentException $e) {
+        exit($templates->render('error', ['message' => 'Specified ID is invalid.']));
+    }
+    
+    try {
+        $location->load();
+    } catch (ObjectNotFoundException $e) {
+        exit($templates->render('error', ['message' => 'Specified ID not found.']));
+    }
+
+    echo $templates->render('locations-view', ['location' => $location]);
 }
 
 ?>

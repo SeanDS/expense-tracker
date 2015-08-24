@@ -1,6 +1,3 @@
-<?php $this->layout('template', ['page' => 'expenses', 'title' => 'Expenses - Delete Expense']) ?>
-        <div class="container">
-            <h1>Expenses</h1>
-            <h2>Delete Expense</h2>
-            <?php $this->insert('expenses-delete-form', ['expense' => $expense]) ?>
-        </div>
+<?php $this->layout('expenses-template', ['title' => 'Delete']) ?>
+<h2>Delete Expense</h2>
+<?php $this->insert('expenses-delete-form', ['expense' => $expense]) ?>

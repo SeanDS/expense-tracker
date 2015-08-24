@@ -1,3 +1,4 @@
+<h2>List</h2>
 <?php if ($message == 'editsuccess'): ?>
 <div class="alert alert-success alert-dismissible" role="alert">
     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -27,10 +28,10 @@
     <?php if ($expenses->count()): ?>
         <?php foreach($expenses->get() as $expense): ?>
         <tr>
-            <td><?=$expense->getDate($user, false)?></td>
-            <td><?=$expense->getType()->getAttribute('name')?></td>
+            <td><a href="index.php?do=view&amp;id=<?=$this->e($expense->getId())?>"><?=$expense->getDate()?></a></td>
+            <td><a href="types.php?do=view&amp;id=<?=$this->e($expense->getType()->getId())?>"><?=$expense->getType()->getAttribute('name')?></a></td>
             <td>£<?=$expense->getAttribute('amount')?></td>
-            <td><?=$expense->getLocation()->getDescription()?></td>
+            <td><a href="locations.php?do=view&amp;id=<?=$this->e($expense->getLocation()->getId())?>"><?=$expense->getLocation()->getDescription()?></a></td>
             <td><?=$expense->getAttribute('comment')?></td>
             <td class="text-center">
                 <div class="btn-group">

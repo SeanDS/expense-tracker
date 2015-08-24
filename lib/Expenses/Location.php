@@ -2,11 +2,6 @@
 
 namespace Expenses;
 
-use \Exception;
-use \InvalidArgumentException;
-
-use Config;
-
 class Location extends AbstractSingular
 {
     public static $attributeTypes = array(
@@ -18,6 +13,47 @@ class Location extends AbstractSingular
     public static $table = 'locations';
     public static $idColumn = 'locationid';
     public static $defaultLocationId = 1;
+    
+    /**
+     * Sets expenses with this location to specified other location before deleting this
+     * location.
+     * 
+     * @override AbstractSingular::delete
+     * @global type $db
+     */
+    public function delete($newLocationId) {
+        if ($this->getId() === self::$defaultLocationId) {
+            throw new InvalidArgumentException("Default location cannot be deleted");
+        }
+        
+        global $db;
+        
+        $newLocation = new Location($newLocationId);
+        $newLocation->load();
+        
+        $expenses = new ExpenseGroup(
+            array(
+                array(
+                    'column'    =>  'locationid',
+                    'operator'  =>  ExpenseGroup::OPERATOR_EQUALS,
+                    'value'     =>  $this->getId()
+                )
+            )
+        );
+        
+        // start database transaction
+        $db->beginTransaction();
+        
+        // load and move expenses associated with this location to new one
+        $expenses->load();
+        $expenses->moveToLocation($newLocation->getId());
+        
+        // delete location
+        parent::delete();
+        
+        // commit changes to database
+        $db->commit();
+    }
     
     public function getDescription() {
         return $this->getAttribute('organisation') . ", " . $this->getBriefAddress();

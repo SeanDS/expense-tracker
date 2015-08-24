@@ -181,9 +181,13 @@ class User extends AbstractSingular
         return (bool) $exists;
     }
     
-    public function getUtcDateFromUserDate($userDate) {
+    public function getTimeZone() {
         // TODO: use user timezone (as formatDate())
-        $timezone = new DateTimeZone('Europe/London');
+        return new DateTimeZone('Europe/London');
+    }
+    
+    public function getUtcDateFromUserDate($userDate) {
+        $timezone = $this->getTimeZone();
         
         $dateobj = new DateTime($userDate, $timezone);
         $dateobj->setTimezone(new DateTimeZone('UTC'));
@@ -192,8 +196,7 @@ class User extends AbstractSingular
     }
     
     public function getUserDateFromUtcDate($utcDate) {
-        // TODO: use user timezone (as formatDate())
-        $timezone = new DateTimeZone('Europe/London');
+        $timezone = $this->getTimeZone();
         
         $dateobj = new DateTime($utcDate, new DateTimeZone('UTC'));
         $dateobj->setTimezone($timezone);

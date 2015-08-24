@@ -1,7 +1,3 @@
-<?php $this->layout('template', ['page' => 'locations', 'title' => 'Locations']) ?>
-        <div class="container">
-            <h1>Locations</h1>
-            <h2>List</h2>
-            <?php $this->insert('locations-list') ?>
-            <p><a href="locations.php?do=new" class="btn btn-success">New</a></p>
-        </div>
+<?php $this->layout('locations-template') ?>
+<?php $this->insert('locations-list', ['locations' => $locations, 'message' => $get['message']]) ?>
+<p><a href="locations.php?do=new" class="btn btn-success">New</a></p>

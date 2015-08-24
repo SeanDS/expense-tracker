@@ -6,6 +6,8 @@ use Expenses\NotLoadedException;
 use Expenses\Type;
 use Expenses\Location;
 
+use Config;
+
 /**
  * Description
  *
@@ -15,7 +17,30 @@ class ExpenseGroup extends AbstractGroup
 {
     protected static $objectClass = Expense::class;
     
-    function moveToType($newTypeId) {
+    public function getTotalExpenses() {
+        $query = $this->getQueryObject();
+        
+        $query->execute();
+        
+        // get singlular object
+        $obj = static::$objectClass;
+        
+        // table
+        $table = Config::TABLE_PREFIX . $obj::$table;
+        
+        $query->bindColumn('amount', $amount, $obj::$attributeTypes['amount']);
+        
+        $total = 0;
+        
+        // fetch results into bound attributes
+        while ($query->fetch(ExpensesPDO::FETCH_BOUND)) {
+            $total += floatval($amount);
+        }
+        
+        return $total;
+    }
+    
+    public function moveToType($newTypeId) {
         global $db;
         
         if (! $this->isLoaded()) {
@@ -35,7 +60,7 @@ class ExpenseGroup extends AbstractGroup
         $db->commit();
     }
     
-    function moveToLocation($newLocationId) {
+    public function moveToLocation($newLocationId) {
         global $db;
         
         if (! $this->isLoaded()) {

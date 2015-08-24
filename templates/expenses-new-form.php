@@ -32,7 +32,7 @@
         <div class="col-md-10">
             <select class="form-control" name="locationid" id="locationid">
                 <?php foreach($locations->get() as $location): ?>
-                <option value="<?=$this->e($location->getId())?>"><?=$this->e($location->getAddress())?></option>
+                <option value="<?=$this->e($location->getId())?>"><?=$this->e($location->getDescription())?></option>
                 <?php endforeach; ?>
             </select>
         </div>

@@ -149,19 +149,16 @@ abstract class AbstractSingular extends AbstractEntity
         $db->commit();
     }
     
-    public function load() {
+    protected function getQueryObject() {
         global $db;
 
         /*
          * create and execute SQL query
          */
 
-        // list of columns to select
-        $columns = array_keys(static::$attributeTypes);
-
         // full expression
         $sql = "
-            SELECT " . implode(", ", $columns) . "
+            SELECT " . implode(", ", array_keys(static::$attributeTypes)) . "
             FROM " . Config::TABLE_PREFIX . static::$table . "
             WHERE " . static::$idColumn . " = " . self::getTableColumnIdentifier(static::$table, static::$idColumn) . "
         ";
@@ -172,9 +169,10 @@ abstract class AbstractSingular extends AbstractEntity
         // bind ID column
         $query->bindParam(self::getTableColumnIdentifier(static::$table, static::$idColumn), $this->getId(), static::$attributeTypes[static::$idColumn]);
         
-        // execute query
-        $query->execute();
-
+        return $query;
+    }
+    
+    public function bindQuery($query, &$bindArray) {
         /*
          * build attribute array
          */
@@ -183,19 +181,30 @@ abstract class AbstractSingular extends AbstractEntity
         $columnCount = 1;
 
         // bind columns to attributes
-        foreach ($columns as $column) {
-            $query->bindColumn($columnCount, $this->attributes[$column], static::$attributeTypes[$column]);
+        foreach (array_keys(static::$attributeTypes) as $column) {
+            $query->bindColumn($columnCount, $bindArray[$column], static::$attributeTypes[$column]);
 
             $columnCount++;
         }
 
         // fetch results into bound attributes
-        if ($query->fetch(ExpensesPDO::FETCH_BOUND)) {
-            // set loaded
-            $this->setLoaded(true);
-        } else {
+        if (! $query->fetch(ExpensesPDO::FETCH_BOUND)) {
             throw new ObjectNotFoundException(static::$table, static::$idColumn, $this->getId());
         }
+    }
+    
+    public function load() {
+        // get query object
+        $query = $this->getQueryObject();
+        
+        // execute query
+        $query->execute();
+
+        // bind results into attribute array
+        $this->bindQuery($query, $this->attributes);
+        
+        // set loaded
+        $this->setLoaded(true);
     }
     
     public function delete() {

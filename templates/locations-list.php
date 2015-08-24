@@ -1,3 +1,4 @@
+<h2>List</h2>
 <?php if ($message == 'editsuccess'): ?>
 <div class="alert alert-success alert-dismissible" role="alert">
     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -29,7 +30,7 @@
     <tbody>
         <?php foreach($locations->get() as $location): ?>
         <tr>
-            <td><?=$this->e($location->getAttribute('organisation'))?></td>
+            <td><a href="locations.php?do=view&amp;id=<?=$this->e($location->getId())?>"><?=$this->e($location->getAttribute('organisation'))?></a></td>
             <td><address><?=$location->getFormattedAddress()?></address></td>
             <td class="text-center"><?=$this->e($location->getExpenseCount())?></td>
             <td class="text-center">

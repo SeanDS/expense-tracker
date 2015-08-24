@@ -71,7 +71,6 @@ abstract class AbstractGroup extends AbstractEntity
             self::validateRowLimit($rowLimit);
         }
         
-        $this->objectClass = $objectClass;
         $this->whereCriteria = $whereCriteria;        
         $this->orderBy = $orderBy;
         $this->startRow = $startRow;
@@ -79,7 +78,7 @@ abstract class AbstractGroup extends AbstractEntity
         $this->countRows = ($countRows) ? true : false;
     }
     
-    public function load() {
+    protected function getQueryObject() {
         global $db;
 
         /*
@@ -92,9 +91,6 @@ abstract class AbstractGroup extends AbstractEntity
         // table
         $table = Config::TABLE_PREFIX . $obj::$table;
 
-        // list of columns to select
-        $columns = array_keys($obj::$attributeTypes);
-        
         /*
          * process WHERE clauses
          */
@@ -174,7 +170,7 @@ abstract class AbstractGroup extends AbstractEntity
         $limitString = "";
         
         if ($this->rowLimit !== null) {
-            $limitString = "LIMIT " . $this->startRow . ", " . $this->rowLimit;
+            $limitString = "LIMIT " . $this->startRow . ", " . $rowLimit;
         }
 
         /*
@@ -182,7 +178,7 @@ abstract class AbstractGroup extends AbstractEntity
          */
 
         // full expression
-        $sql = "SELECT " . (($this->countRows) ? "SQL_CALC_FOUND_ROWS " : "") . implode(", ", $columns) . " FROM " . $table . " " . $whereClause . " " . $orderByClause . " " . $limitString;
+        $sql = "SELECT " . (($this->countRows) ? "SQL_CALC_FOUND_ROWS " : "") . implode(", ", array_keys($obj::$attributeTypes)) . " FROM " . $table . " " . $whereClause . " " . $orderByClause . " " . $limitString;
         
         // prepare statement
         $query = $db->prepare($sql);
@@ -195,13 +191,16 @@ abstract class AbstractGroup extends AbstractEntity
         foreach ($this->whereCriteria as $criterion) {
             $query->bindParam(self::getTableColumnIdentifier($table, $criterion['column']), $criterion['value'], $criterion['type']);
         }
-
-        /*
-         * execute query
-         */
         
-        $query->execute();
-
+        return $query;
+    }
+    
+    protected function bindQuery($query) {
+        global $db;
+        
+        // get singlular object
+        $obj = static::$objectClass;
+        
         /*
          * build attribute array
          */
@@ -211,7 +210,7 @@ abstract class AbstractGroup extends AbstractEntity
         // column iterator
         $columnCount = 1;
 
-        foreach ($columns as $column) {
+        foreach (array_keys($obj::$attributeTypes) as $column) {
             $query->bindColumn($columnCount, $attributes[$column]);
 
             $columnCount++;
@@ -240,6 +239,20 @@ abstract class AbstractGroup extends AbstractEntity
             $rowCountQuery->fetch(ExpensesPDO::FETCH_BOUND);
             $rowCountQuery->closeCursor();
         }
+    }
+    
+    public function load() {
+        // get query
+        $query = $this->getQueryObject();
+
+        // execute query
+        $query->execute();
+        
+        // bind results
+        $this->bindQuery($query);
+
+        // set loaded to true
+        $this->setLoaded(true);
     }
     
     public function get() {

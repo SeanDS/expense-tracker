@@ -2,10 +2,7 @@
 
 namespace Expenses;
 
-use \Exception;
 use \InvalidArgumentException;
-
-use Config;
 
 class Type extends AbstractSingular
 {

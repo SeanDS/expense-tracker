@@ -22,10 +22,7 @@ if (empty($do)) {
     // page title for template
     $templates->addData(['title' => 'Types'], ['template']);
 
-    // types
-    $templates->addData(['types' => $types, 'message' => $get['message']], ['types-list']);
-
-    echo $templates->render('types');
+    echo $templates->render('types', ['types' => $types, 'message' => $get['message']]);
 } elseif ($do === 'new') {
     /*
      * Process POST data
@@ -214,6 +211,31 @@ if (empty($do)) {
         
         header('Location: types.php?message=deletesuccess');
     }
+} elseif ($do === 'view') {
+    $get = filter_input_array(
+        INPUT_GET,
+        array(
+            'id'    =>  FILTER_VALIDATE_INT
+        )
+    );
+    
+    /*
+     * Load type
+     */
+    
+    try {
+        $type = new Type($get['id']);
+    } catch (InvalidArgumentException $e) {
+        exit($templates->render('error', ['message' => 'Specified ID is invalid.']));
+    }
+    
+    try {
+        $type->load();
+    } catch (ObjectNotFoundException $e) {
+        exit($templates->render('error', ['message' => 'Specified ID not found.']));
+    }
+
+    echo $templates->render('types-view', ['type' => $type]);
 }
 
 ?>
