@@ -180,83 +180,32 @@ class User extends AbstractSingular
         
         return (bool) $exists;
     }
-
-    // $nonDescriptiveFormat is only used if $descriptive is false
-    public function formatDate($dateString, $descriptive = true) {
-        $timestamp = strtotime($dateString);
-        
-        // TODO: use user timezone
-        $timezone = new DateTimeZone('Europe/London');
     
-        $now = new DateTime("now", $timezone);
-        $time = new DateTime("@" . $timestamp, $timezone);
-
-        if ($descriptive) {
-            if($timestamp == 0) {
-                return "Never";
-            }
-
-            $difference = $now->getTimestamp() - $time->getTimestamp();
-
-            if ($difference >= 0) {
-                // In the past
-
-                if ($difference < 3) {
-                    return "Now";
-                } elseif ($difference < 60) {
-                    return ($difference == 1) ? "1 second ago" : $difference . " seconds ago";
-                } elseif ($difference < 3600) {
-                    $difference = intval(floor($difference / 60));
-
-                    return ($difference == 1) ? "1 minute ago" : $difference . " minutes ago";
-                } elseif ($difference < 86400) {
-                    $difference = intval(floor($difference / 3600));
-
-                    return ($difference == 1) ? "1 hour ago" : $difference . " hours ago";
-                } elseif ($difference < 2592000) {
-                    $difference = intval(floor($difference / 86400));
-
-                    return ($difference == 1) ? "1 day ago" : $difference . " days ago";
-                } elseif ($difference < 31536000) {
-                    $difference = intval(floor($difference / 2592000));
-
-                    return ($difference == 1) ? "1 month ago" : $difference . " months ago";
-                } else {
-                    $difference = intval(floor($difference / 31536000));
-
-                    return ($difference == 1) ? "1 year ago" : $difference . " years ago";
-                }
-            } else {
-                // Flip sign. This prevents potential issues with rounding (PHP can round upwards on negative numbers at times, where the desired behaviour is to round down)
-                $difference = -$difference;
-
-                if ($difference < 60) {
-                    return ($difference == 1) ? "in 1 second" : "in " . $difference . " seconds";
-                } elseif ($difference < 3600) {
-                    $difference = intval(floor($difference / 60));
-
-                    return ($difference == 1) ? "in 1 minute" : "in " . $difference . " minutes";
-                } elseif ($difference < 86400) {
-                    $difference = intval(floor($difference / 3600));
-
-                    return ($difference == 1) ? "in 1 hour" : "in " . $difference . " hours";
-                } elseif ($difference < 2592000) {
-                    $difference = intval(floor($difference / 86400));
-
-                    return ($difference == 1) ? "in 1 day" : "in " . $difference . " days";
-                } elseif ($difference < 31536000) {
-                    $difference = intval(floor($difference / 2592000));
-
-                    return ($difference == 1) ? "in 1 month" : "in " . $difference . " months";
-                } else {
-                    $difference = intval(floor($difference / 31536000));
-
-                    return ($difference == 1) ? "in 1 year" : "in " . $difference . " years";
-                }
-            }
-        } else {
-            return gmdate($this->getAttribute('dateformat'), $timestamp);
-        }
+    public function getUtcDateFromUserDate($userDate) {
+        // TODO: use user timezone (as formatDate())
+        $timezone = new DateTimeZone('Europe/London');
+        
+        $dateobj = new DateTime($userDate, $timezone);
+        $dateobj->setTimezone(new DateTimeZone('UTC'));
+        
+        return $dateobj->format(DB_DATE_FORMAT);
+    }
+    
+    public function getUserDateFromUtcDate($utcDate) {
+        // TODO: use user timezone (as formatDate())
+        $timezone = new DateTimeZone('Europe/London');
+        
+        $dateobj = new DateTime($utcDate, new DateTimeZone('UTC'));
+        $dateobj->setTimezone($timezone);
+        
+        return $dateobj->format(DB_DATE_FORMAT);
+    }
+    
+    /**
+     * Returns the current time in the user's timezone
+     */
+    public function getCurrentUserDate() {
+        return $this->getUserDateFromUtcDate("now");
     }
     
     /**

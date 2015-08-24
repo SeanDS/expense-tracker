@@ -1,4 +1,4 @@
-<form action="types.php?do=edit&amp;id=<?=$this->e($type->getAttribute('typeid'))?>" method="post" class="form-horizontal">
+<form action="types.php?do=edit&amp;id=<?=$this->e($type->getId())?>" method="post" class="form-horizontal">
     <div class="form-group">
         <label for="name" class="control-label col-md-2">Name</label>
         <div class="col-md-10">
@@ -13,7 +13,7 @@
     </div>
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">Save</button>
             <button type="reset" class="btn btn-danger">Reset</button>
         </div>
     </div>

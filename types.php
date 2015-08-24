@@ -19,9 +19,6 @@ if (empty($do)) {
     $types = new TypeGroup();
     $types->load();
 
-    // global user
-    $templates->addData(['user' => $user]);
-
     // page title for template
     $templates->addData(['title' => 'Types'], ['template']);
 

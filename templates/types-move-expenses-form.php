@@ -1,4 +1,4 @@
-<form action="types.php?do=moveexpenses&amp;id=<?=$this->e($type->getAttribute('typeid'))?>" method="post" class="form-horizontal">
+<form action="types.php?do=moveexpenses&amp;id=<?=$this->e($type->getId())?>" method="post" class="form-horizontal">
     <div class="form-group">
         <label for="newtypeid" class="control-label col-md-2">Move expenses to</label>
         <div class="col-md-10">

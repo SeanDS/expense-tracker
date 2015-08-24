@@ -6,7 +6,6 @@ use \Exception;
 use \InvalidArgumentException;
 
 use Config;
-use Expenses\InvalidCredentialsException;
 
 class Location extends AbstractSingular
 {
@@ -18,48 +17,38 @@ class Location extends AbstractSingular
     
     public static $table = 'locations';
     public static $idColumn = 'locationid';
+    public static $defaultLocationId = 1;
     
-    public static function create($data) {
-        global $db;
-        
-        if (! (array_key_exists('username', $data) && (array_key_exists('password', $data)))) {
-            throw new InvalidArgumentException("Specified data array must include username and password keys.");
-        }
-        
-        if (! self::validateUsername($data['username'])) {
-            throw new Exception("Invalid username specified.");
-        }
-        
-        if (self::userExists($data['username'])) {
-            throw new Exception("Specified username is already in use.");
-        }
-        
-        $newUserQuery = $db->prepare("
-            INSERT INTO " . Config::TABLE_PREFIX . "users (username, password, salt, dateformat, lastlogin)
-            VALUES (:username, :password, :salt, NOW())
-        ");
-        
-        $newUserQuery->bindParam(':username', $data['username'], self::$attributeTypes['username']);
-        $newUserQuery->bindParam(':password', $password, self::$attributeTypes['password']);
-        $newUserQuery->bindParam(':salt', $salt, self::$attributeTypes['salt']);
-        $newUserQuery->bindParam(':dateformat', $dateFormat, self::$attributeTypes['dateformat']);
-        
-        $newUserQuery->execute();
-        
-        if (! $newUserQuery->rowCount() === 1) {
-            throw new Exception("Database entry not inserted.");
-        }
-        
-        $userId = $db->lastInsertId();
-        
-        $user = new self($userId);
-        $user->load();
-        
-        return $user;
+    public function getDescription() {
+        return $this->getAttribute('organisation') . ", " . $this->getBriefAddress();
     }
     
-    public function getAddress() {
-        return $this->getAttribute('organisation') . ", " . $this->getAttribute('address');
+    public function getBriefAddress() {
+        return str_replace(["\r\n", "\r", "\n"], ", ", $this->getAttribute('address'));
+    }
+    
+    public function getFormattedAddress() {
+        return nl2br($this->getAttribute('address'));
+    }
+    
+    public function getExpenseCount() {
+        if (! $this->isLoaded()) {
+            throw new NotLoadedException();
+        }
+        
+        $expenses = new ExpenseGroup(
+            array(
+                array(
+                    'column'    =>  'locationid',
+                    'operator'  =>  ExpenseGroup::OPERATOR_EQUALS,
+                    'value'     =>  $this->getId()
+                )
+            )
+        );
+        
+        $expenses->load();
+        
+        return $expenses->count();
     }
 }
 

@@ -5,8 +5,6 @@ namespace Expenses;
 use \Exception;
 use \InvalidArgumentException;
 
-use Config;
-
 class Expense extends AbstractSingular {
     public static $attributeTypes = array(
         'expenseid'     =>  ExpensesPDO::PARAM_INT,
@@ -22,11 +20,15 @@ class Expense extends AbstractSingular {
     
     public static function create($data) {
         global $db;
+        global $user;
         
         if (array_key_exists('date', $data)) {
             if (! self::validateDateString($data['date'])) {
                 throw new Exception("Invalid date specified.");
             }
+            
+            // format date as UTC
+            $data['date'] = $user->getUtcDateFromUserDate($data['date']);
         } else {
             throw new Exception("Invalid date specified.");
         }
@@ -50,9 +52,14 @@ class Expense extends AbstractSingular {
         parent::create($data);
     }
     
-    public function getDate($user, $descriptive = true) {
-        // TODO: check user is valid object
-        return $user->formatDate($this->getAttribute('date'), $descriptive);
+    public function getDescription() {
+        return sprintf("£%.2f at %s at %s", $this->getAttribute('amount'), $this->getLocation()->getDescription(), $this->getDate());
+    }
+    
+    public function getDate() {
+        global $user;
+        
+        return $user->getUserDateFromUtcDate($this->getAttribute('date'));
     }
     
     public function getType() {
