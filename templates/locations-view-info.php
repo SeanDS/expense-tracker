@@ -19,6 +19,10 @@
         </tr>
     </tbody>
 </table>
+<?php if ($recentExpenses->count()): ?>
+<h2>Recent Expenses</h2>
+<?php $this->insert('expenses-list', ['expenses' => $recentExpenses]) ?>
+<?php endif; ?>
 <div class="btn-group">
     <a href="locations.php?do=edit&amp;id=<?=$this->e($location->getId())?>" class="btn btn-xs btn-default">Edit</a>
     <a href="locations.php?do=moveexpenses&amp;id=<?=$this->e($location->getId())?>" class="btn btn-xs btn-default">Move Expenses</a>

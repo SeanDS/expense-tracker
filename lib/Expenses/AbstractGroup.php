@@ -170,7 +170,7 @@ abstract class AbstractGroup extends AbstractEntity
         $limitString = "";
         
         if ($this->rowLimit !== null) {
-            $limitString = "LIMIT " . $this->startRow . ", " . $rowLimit;
+            $limitString = "LIMIT " . $this->startRow . ", " . $this->rowLimit;
         }
 
         /*

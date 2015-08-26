@@ -230,8 +230,32 @@ if (empty($do)) {
     } catch (ObjectNotFoundException $e) {
         exit($templates->render('error', ['message' => 'Specified ID not found.']));
     }
+    
+    /*
+     * Load recent expenses
+     */
+    
+    $recentExpenses = new ExpenseGroup(
+        array(
+            array(
+                'column'    =>  'locationid',
+                'operator'  => ExpenseGroup::OPERATOR_EQUALS,
+                'value'     =>  $location->getId()
+            )
+        ),
+        array(
+            array(
+                'column'    =>  'date',
+                'direction' => ExpenseGroup::ORDER_DESC
+            )
+        ),
+        0,
+        10
+    );
+    
+    $recentExpenses->load();
 
-    echo $templates->render('locations-view', ['location' => $location]);
+    echo $templates->render('locations-view', ['location' => $location, 'recentExpenses' => $recentExpenses]);
 }
 
 ?>
