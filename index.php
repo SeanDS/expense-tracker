@@ -64,6 +64,38 @@ if (empty($do)) {
         'amount'    =>  $lastDayGroup->getTotalExpenses()
     );
     
+    // last 7 days
+    $userOneWeekAgo = $userTime->sub(new DateInterval('P7D'));
+    $lastWeekGroup = new ExpenseGroup(
+        array(
+            array(
+                'column'    =>  'date',
+                'operator'  => ExpenseGroup::OPERATOR_GREATER_THAN_EQUALS,
+                'value'     =>  $userOneWeekAgo->format(DB_DATE_FORMAT)
+            )
+        )
+    );
+    $totals[] = array(
+        'range'     =>  'Last 7 days',
+        'amount'    =>  $lastWeekGroup->getTotalExpenses()
+    );
+    
+    // last 30 days
+    $userOneMonthAgo = $userTime->sub(new DateInterval('P30D'));
+    $lastMonthGroup = new ExpenseGroup(
+        array(
+            array(
+                'column'    =>  'date',
+                'operator'  => ExpenseGroup::OPERATOR_GREATER_THAN_EQUALS,
+                'value'     =>  $userOneMonthAgo->format(DB_DATE_FORMAT)
+            )
+        )
+    );
+    $totals[] = array(
+        'range'     =>  'Last 30 days',
+        'amount'    =>  $lastMonthGroup->getTotalExpenses()
+    );
+    
     // all time
     $allTimeGroup = new ExpenseGroup();
     $totals[] = array(
