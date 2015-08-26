@@ -7,7 +7,7 @@
     <tbody>
         <?php foreach($totals as $total): ?>
         <tr>
-            <td><?=$this->e($total['range'])?></td><td>£<?=$this->e($total['amount'])?></td>
+            <td><?=$this->e($total['range'])?></td><td><?=$this->e(sprintf("£%.2f", $total['amount']))?></td>
         </tr>
         <?php endforeach; ?>
     </tbody>
