@@ -31,7 +31,7 @@
         <?php foreach($locations->get() as $location): ?>
         <tr>
             <td><a href="locations.php?do=view&amp;id=<?=$this->e($location->getId())?>"><?=$this->e($location->getAttribute('organisation'))?></a></td>
-            <td><address><?=$location->getFormattedAddress()?></address></td>
+            <td><address><?=$this->e($location->getFormattedAddress())?></address></td>
             <td class="text-center"><?=$this->e($location->getExpenseCount())?></td>
             <td class="text-center">
                 <div class="btn-group">

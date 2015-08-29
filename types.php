@@ -31,8 +31,11 @@ if (empty($do)) {
     $post = filter_input_array(
         INPUT_POST,
         array(
-            'name'          =>  FILTER_SANITIZE_STRING,
-            'description'   =>  FILTER_SANITIZE_STRING
+            'name'          =>  FILTER_SANITIZE_URL,
+            'description'   =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
+                                )
         )
     );
     
@@ -74,8 +77,11 @@ if (empty($do)) {
     $post = filter_input_array(
         INPUT_POST,
         array(
-            'name'          =>  FILTER_SANITIZE_STRING,
-            'description'   =>  FILTER_SANITIZE_STRING
+            'name'          =>  FILTER_SANITIZE_URL,
+            'description'   =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
+                                )
         )
     );
     

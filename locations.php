@@ -28,8 +28,11 @@ if (empty($do)) {
     $post = filter_input_array(
         INPUT_POST,
         array(
-            'organisation'  =>  FILTER_SANITIZE_STRING,
-            'address'       =>  FILTER_SANITIZE_STRING
+            'organisation'  =>  FILTER_SANITIZE_URL,
+            'address'       =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
+                                )
         )
     );
     
@@ -71,14 +74,17 @@ if (empty($do)) {
     $post = filter_input_array(
         INPUT_POST,
         array(
-            'organisation'  =>  FILTER_SANITIZE_STRING,
-            'address'       =>  FILTER_SANITIZE_STRING
+            'organisation'  =>  FILTER_SANITIZE_URL,
+            'address'       =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
+                                )
         )
     );
     
     if (! count($_POST)) {
         echo $templates->render('locations-edit', ['location' => $location]);
-    } else {
+    } else {        
         // FIXME: validate
         $location->setAttribute('organisation', $post['organisation']);
         $location->setAttribute('address', $post['address']);

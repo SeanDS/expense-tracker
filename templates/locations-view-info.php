@@ -11,7 +11,7 @@
         </tr>
         <tr>
             <td>Address</td>
-            <td><address><?=$location->getFormattedAddress()?></address></td>
+            <td><address><?=$this->e($location->getFormattedAddress())?></address></td>
         </tr>
         <tr>
             <td>Expense count</td>

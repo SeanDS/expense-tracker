@@ -91,7 +91,7 @@ class User extends AbstractSingular
     }
     
     public static function validateUsername($username) {
-        $length = strlen($username);
+        $length = mb_strlen($username);
         
         return (
             preg_match('!^[\w -_]*$!', $username) &&
@@ -236,7 +236,7 @@ class User extends AbstractSingular
     {
         // Create salt
         $saltCharacterList = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*?";
-        $saltUpperBound = strlen($saltCharacterList) - 1;
+        $saltUpperBound = mb_strlen($saltCharacterList) - 1;
         $salt = "";
 
         for($i = 0; $i < 128; $i++)

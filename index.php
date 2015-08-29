@@ -116,7 +116,10 @@ if (empty($do)) {
             'typeid'        =>  FILTER_VALIDATE_INT,
             'amount'        =>  FILTER_VALIDATE_FLOAT,
             'locationid'    =>  FILTER_VALIDATE_INT,
-            'comment'       =>  FILTER_SANITIZE_STRING
+            'comment'       =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
+                                )
         )
     );
     
@@ -170,7 +173,10 @@ if (empty($do)) {
             'typeid'        =>  FILTER_VALIDATE_INT,
             'amount'        =>  FILTER_VALIDATE_FLOAT,
             'locationid'    =>  FILTER_VALIDATE_INT,
-            'comment'       =>  FILTER_SANITIZE_STRING
+            'comment'       =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
+                                )
         )
     );
     

@@ -3,6 +3,9 @@
 // constants
 define('DB_DATE_FORMAT', 'Y-m-d H:i:s');
 
+// set charset
+ini_set('default_charset', "utf-8");
+
 // configuration settings
 require('lib/Config.php');
 
@@ -82,8 +85,9 @@ try {
         Config::DATABASE_USERNAME,
         Config::DATABASE_PASSWORD,
         array(
-            PDO::ATTR_PERSISTENT    =>  true,
-            PDO::ATTR_ERRMODE       =>  PDO::ERRMODE_EXCEPTION
+            PDO::ATTR_PERSISTENT            =>  true,
+            PDO::ATTR_ERRMODE               =>  PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_INIT_COMMAND    => "SET NAMES utf8"
         )
     );
     

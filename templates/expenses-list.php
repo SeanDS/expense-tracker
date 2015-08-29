@@ -30,9 +30,9 @@
         <tr>
             <td><a href="index.php?do=view&amp;id=<?=$this->e($expense->getId())?>"><?=$expense->getDate()?></a></td>
             <td><a href="types.php?do=view&amp;id=<?=$this->e($expense->getType()->getId())?>"><?=$expense->getType()->getAttribute('name')?></a></td>
-            <td>£<?=$expense->getAttribute('amount')?></td>
+            <td>£<?=$this->e($expense->getAttribute('amount'))?></td>
             <td><a href="locations.php?do=view&amp;id=<?=$this->e($expense->getLocation()->getId())?>"><?=$expense->getLocation()->getDescription()?></a></td>
-            <td><?=$expense->getAttribute('comment')?></td>
+            <td><?=$this->e($expense->getFormattedComment())?></td>
             <td class="text-center">
                 <div class="btn-group">
                     <a href="index.php?do=edit&amp;id=<?=$this->e($expense->getId())?>" class="btn btn-xs btn-default">Edit</a>

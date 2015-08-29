@@ -56,6 +56,10 @@ class Expense extends AbstractSingular {
         return sprintf("£%.2f at %s at %s", $this->getAttribute('amount'), $this->getLocation()->getDescription(), $this->getDate());
     }
     
+    public function getFormattedComment() {
+        return nl2br($this->getAttribute('comment'));
+    }
+    
     public function getDate() {
         global $user;
         
@@ -85,7 +89,7 @@ class Expense extends AbstractSingular {
     public static function validateComment($comment) {
         return (
             (is_string($comment)) &&
-            (strlen($comment) <= 255) // database-defined maximum length
+            (mb_strlen($comment) <= 255) // database-defined maximum length
         );
     }
 }

@@ -57,6 +57,10 @@ class Type extends AbstractSingular
         $db->commit();
     }
     
+    public function getFormattedDescription() {
+        return nl2br($this->getAttribute('description'));
+    }
+    
     public function getExpenseCount() {
         if (! $this->isLoaded()) {
             throw new NotLoadedException();

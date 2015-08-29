@@ -56,7 +56,14 @@ class Location extends AbstractSingular
     }
     
     public function getDescription() {
-        return $this->getAttribute('organisation') . ", " . $this->getBriefAddress();
+        $description = $this->getAttribute('organisation');
+        $address = $this->getBriefAddress();
+        
+        if (mb_strlen($address)) {
+            $description .= ", " . $address;
+        }
+        
+        return $description;
     }
     
     public function getBriefAddress() {
