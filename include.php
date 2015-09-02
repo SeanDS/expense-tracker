@@ -104,14 +104,26 @@ try {
 $do = filter_input(INPUT_GET, 'do', FILTER_SANITIZE_STRING);
 
 /*
- * Load user
+ * Start session
  */
 
 use Expenses\User;
 
-$user = User::login("sean", "test");
+session_set_cookie_params(86400, Config::SERVER_ROOT);
+session_start();
 
-// add user to template
-$templates->addData(['user' => $user]);
+// detect user session
+if (array_key_exists('userId', $_SESSION)) {
+    $userId = $_SESSION['userId'];
+
+    $user = new User($userId);
+    $user->load();
+
+    $templates->addData(['user' => $user]);
+} else {
+    if (basename($_SERVER['SCRIPT_NAME']) !== 'login.php') {
+        header('Location: login.php');
+    }
+}
 
 ?>

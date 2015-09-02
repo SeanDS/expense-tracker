@@ -32,7 +32,9 @@
             </div>
         </nav>
         <div class="container">
+            <?php if (! empty($user)): ?>
             <p class="lead">Hello, <strong><?=$this->e($user->getAttribute('username'))?></strong>!</p>
+            <?php endif; ?>
         </div>
 <?=$this->section('content')?>
         <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
