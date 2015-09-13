@@ -367,6 +367,38 @@ abstract class AbstractGroup extends AbstractEntity
             throw new InvalidArgumentException("Specified row limit is invalid.");
         }
     }
+    
+    public function getWhereCriteria() {
+        if (! $this->isLoaded()) {
+            throw new NotLoadedException();
+        }
+        
+        return $this->whereCriteria;
+    }
+    
+    public function getOrderBy() {
+        if (! $this->isLoaded()) {
+            throw new NotLoadedException();
+        }
+        
+        return $this->orderBy;
+    }
+    
+    public function getStartRow() {
+        if (! $this->isLoaded()) {
+            throw new NotLoadedException();
+        }
+        
+        return $this->startRow;
+    }
+    
+    public function getRowLimit() {
+        if (! $this->isLoaded()) {
+            throw new NotLoadedException();
+        }
+        
+        return $this->rowLimit;
+    }
 }
 
 ?>

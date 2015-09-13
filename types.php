@@ -5,7 +5,10 @@ require('include.php');
 use Expenses\Type;
 use Expenses\TypeGroup;
 use Expenses\ExpenseGroup;
+use Expenses\Totals;
 use Expenses\ObjectNotFoundException;
+
+
 use \InvalidArgumentException;
 
 if (empty($do)) {
@@ -31,7 +34,10 @@ if (empty($do)) {
     $post = filter_input_array(
         INPUT_POST,
         array(
-            'name'          =>  FILTER_SANITIZE_URL,
+            'name'          =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH
+                                ),
             'description'   =>  array(
                                     'filter'    =>  FILTER_SANITIZE_STRING,
                                     'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
@@ -77,7 +83,10 @@ if (empty($do)) {
     $post = filter_input_array(
         INPUT_POST,
         array(
-            'name'          =>  FILTER_SANITIZE_URL,
+            'name'          =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH
+                                ),
             'description'   =>  array(
                                     'filter'    =>  FILTER_SANITIZE_STRING,
                                     'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
@@ -242,10 +251,10 @@ if (empty($do)) {
     }
     
     /*
-     * Load recent expenses
+     * Load expenses
      */
     
-    $recentExpenses = new ExpenseGroup(
+    $expenses = new ExpenseGroup(
         array(
             array(
                 'column'    =>  'typeid',
@@ -258,14 +267,13 @@ if (empty($do)) {
                 'column'    =>  'date',
                 'direction' => ExpenseGroup::ORDER_DESC
             )
-        ),
-        0,
-        10
+        )
     );
     
-    $recentExpenses->load();
+    $expenses->load();
+    $totals = new Totals($expenses);
 
-    echo $templates->render('types-view', ['type' => $type, 'recentExpenses' => $recentExpenses]);
+    echo $templates->render('types-view', ['type' => $type, 'expenses' => $expenses, 'totals' => $totals->getTotals($user)]);
 }
 
 ?>

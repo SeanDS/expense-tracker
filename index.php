@@ -6,9 +6,7 @@ use Expenses\Expense;
 use Expenses\ExpenseGroup;
 use Expenses\TypeGroup;
 use Expenses\LocationGroup;
-
-use \DateTime;
-use \DateInterval;
+use Expenses\Totals;
 
 if (empty($do)) {
     $get = filter_input_array(
@@ -22,88 +20,21 @@ if (empty($do)) {
      * Get recent expenses
      */
     
-    $expenses = new ExpenseGroup();
+    $expenses = new ExpenseGroup(
+        array(),
+        array(
+            array(
+                'column' => 'date',
+                'direction' => ExpenseGroup::ORDER_DESC
+            )
+        )
+    );
+    
     $expenses->load();
     
-    /*
-     * Get expenditure
-     */
-    
-    $totals = array();
-    $userTime = new DateTime($user->getCurrentUserDate(), $user->getTimeZone());
-    
-    // today
-    $userMidnight = $userTime->setTime(0, 0, 0);
-    $todayGroup = new ExpenseGroup(
-        array(
-            array(
-                'column'    =>  'date',
-                'operator'  => ExpenseGroup::OPERATOR_GREATER_THAN_EQUALS,
-                'value'     =>  $userMidnight->format(DB_DATE_FORMAT)
-            )
-        )
-    );
-    $totals[] = array(
-        'range'     =>  'Today',
-        'amount'    =>  $todayGroup->getTotalExpenses()
-    );
-    
-    // last 24 hours
-    $userOneDayAgo = $userTime->sub(new DateInterval('P1D'));
-    $lastDayGroup = new ExpenseGroup(
-        array(
-            array(
-                'column'    =>  'date',
-                'operator'  => ExpenseGroup::OPERATOR_GREATER_THAN_EQUALS,
-                'value'     =>  $userOneDayAgo->format(DB_DATE_FORMAT)
-            )
-        )
-    );
-    $totals[] = array(
-        'range'     =>  'Last 24 hours',
-        'amount'    =>  $lastDayGroup->getTotalExpenses()
-    );
-    
-    // last 7 days
-    $userOneWeekAgo = $userTime->sub(new DateInterval('P7D'));
-    $lastWeekGroup = new ExpenseGroup(
-        array(
-            array(
-                'column'    =>  'date',
-                'operator'  => ExpenseGroup::OPERATOR_GREATER_THAN_EQUALS,
-                'value'     =>  $userOneWeekAgo->format(DB_DATE_FORMAT)
-            )
-        )
-    );
-    $totals[] = array(
-        'range'     =>  'Last 7 days',
-        'amount'    =>  $lastWeekGroup->getTotalExpenses()
-    );
-    
-    // last 30 days
-    $userOneMonthAgo = $userTime->sub(new DateInterval('P30D'));
-    $lastMonthGroup = new ExpenseGroup(
-        array(
-            array(
-                'column'    =>  'date',
-                'operator'  => ExpenseGroup::OPERATOR_GREATER_THAN_EQUALS,
-                'value'     =>  $userOneMonthAgo->format(DB_DATE_FORMAT)
-            )
-        )
-    );
-    $totals[] = array(
-        'range'     =>  'Last 30 days',
-        'amount'    =>  $lastMonthGroup->getTotalExpenses()
-    );
-    
-    // all time
-    $allTimeGroup = new ExpenseGroup();
-    $totals[] = array(
-        'range'     =>  'All Time',
-        'amount'    =>  $allTimeGroup->getTotalExpenses()
-    );
+    $totals = new Totals($expenses);
 
-    echo $templates->render('expenses', ['expenses' => $expenses, 'message' => $get['message'], 'totals' => $totals]);
+    echo $templates->render('expenses', ['expenses' => $expenses, 'message' => $get['message'], 'totals' => $totals->getTotals($user)]);
 } elseif ($do === 'new') {
     /*
      * Process POST data

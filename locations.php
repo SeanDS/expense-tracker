@@ -5,7 +5,9 @@ require('include.php');
 use Expenses\Location;
 use Expenses\LocationGroup;
 use Expenses\ExpenseGroup;
+use Expenses\Totals;
 use Expenses\ObjectNotFoundException;
+
 use \InvalidArgumentException;
 
 if (empty($do)) {
@@ -28,10 +30,13 @@ if (empty($do)) {
     $post = filter_input_array(
         INPUT_POST,
         array(
-            'organisation'  =>  FILTER_SANITIZE_URL,
+            'organisation'  =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH
+                                ),
             'address'       =>  array(
                                     'filter'    =>  FILTER_SANITIZE_STRING,
-                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH
                                 )
         )
     );
@@ -74,7 +79,10 @@ if (empty($do)) {
     $post = filter_input_array(
         INPUT_POST,
         array(
-            'organisation'  =>  FILTER_SANITIZE_URL,
+            'organisation'  =>  array(
+                                    'filter'    =>  FILTER_SANITIZE_STRING,
+                                    'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_HIGH
+                                ),
             'address'       =>  array(
                                     'filter'    =>  FILTER_SANITIZE_STRING,
                                     'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
@@ -238,10 +246,10 @@ if (empty($do)) {
     }
     
     /*
-     * Load recent expenses
+     * Load expenses
      */
     
-    $recentExpenses = new ExpenseGroup(
+    $expenses = new ExpenseGroup(
         array(
             array(
                 'column'    =>  'locationid',
@@ -254,14 +262,13 @@ if (empty($do)) {
                 'column'    =>  'date',
                 'direction' => ExpenseGroup::ORDER_DESC
             )
-        ),
-        0,
-        10
+        )
     );
     
-    $recentExpenses->load();
+    $expenses->load();
+    $totals = new Totals($expenses);
 
-    echo $templates->render('locations-view', ['location' => $location, 'recentExpenses' => $recentExpenses]);
+    echo $templates->render('locations-view', ['location' => $location, 'expenses' => $expenses, 'totals' => $totals->getTotals($user)]);
 }
 
 ?>

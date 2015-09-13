@@ -109,7 +109,8 @@ $do = filter_input(INPUT_GET, 'do', FILTER_SANITIZE_STRING);
 
 use Expenses\User;
 
-session_set_cookie_params(86400, Config::SERVER_ROOT);
+session_name('expense-tracker');
+session_set_cookie_params(7 * 24 * 60 * 60, Config::SERVER_ROOT);
 session_start();
 
 // detect user session
