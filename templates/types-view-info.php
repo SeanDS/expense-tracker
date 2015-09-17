@@ -7,8 +7,14 @@
     <tbody>
         <tr>
             <td>Name</td>
-            <td><?=$this->e($type->getAttribute('name'))?></td>
+            <td><?=$this->e($type->getFullName())?></td>
         </tr>
+        <?php if ($type->hasParent()): ?>
+        <tr>
+            <td>Parent</td>
+            <td><a href="types.php?do=view&amp;id=<?=$this->e($type->getParent()->getId())?>"><?=$this->e($type->getParent()->getFullName())?></a></td>
+        </tr>
+        <?php endif; ?>
         <tr>
             <td>Description</td>
             <td><?=$this->e($type->getAttribute('description'))?></td>

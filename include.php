@@ -69,7 +69,12 @@ register_shutdown_function('fatalErrorHandler');
  * Create the template engine
  */
 
-$templates = new League\Plates\Engine('templates');
+use Expenses\TreePlatesExtension;
+
+$templates = new League\Plates\Engine(Config::TEMPLATE_DIR);
+
+// add tree printer extension
+$templates->loadExtension(new TreePlatesExtension());
 
 /*
  * Create database connection function

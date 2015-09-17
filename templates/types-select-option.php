@@ -1,0 +1,1 @@
+<option value="<?=$this->e($type->getId())?>"<?php if($type->getId() == $selectedTypeId): ?> selected<?php endif; ?>><?=$this->e($type->getFullName())?></option>

@@ -29,7 +29,7 @@
         <?php foreach($expenses->get() as $expense): ?>
         <tr>
             <td><a href="index.php?do=view&amp;id=<?=$this->e($expense->getId())?>"><?=$expense->getDate()?></a></td>
-            <td><a href="types.php?do=view&amp;id=<?=$this->e($expense->getType()->getId())?>"><?=$expense->getType()->getAttribute('name')?></a></td>
+            <td><a href="types.php?do=view&amp;id=<?=$this->e($expense->getType()->getId())?>"><?=$expense->getType()->getFullName()?></a></td>
             <td>£<?=$this->e($expense->getAttribute('amount'))?></td>
             <td><a href="locations.php?do=view&amp;id=<?=$this->e($expense->getLocation()->getId())?>"><?=$expense->getLocation()->getDescription()?></a></td>
             <td><?=$this->e($expense->getFormattedComment())?></td>

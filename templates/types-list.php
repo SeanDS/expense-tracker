@@ -30,7 +30,7 @@
     <tbody>
         <?php foreach($types->get() as $type): ?>
         <tr>
-            <td><a href="types.php?do=view&amp;id=<?=$this->e($type->getId())?>"><?=$this->e($type->getAttribute('name'))?></a></td>
+            <td><a href="types.php?do=view&amp;id=<?=$this->e($type->getId())?>"><?=$this->e($type->getFullName())?></a></td>
             <td><?=$type->getFormattedDescription()?></td>
             <td class="text-center"><?=$this->e($type->getExpenseCount())?></td>
             <td class="text-center">

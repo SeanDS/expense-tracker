@@ -11,11 +11,7 @@
     <div class="form-group">
         <label for="typeid" class="control-label col-md-2">Type</label>
         <div class="col-md-10">
-            <select class="form-control" name="typeid" id="typeid">
-                <?php foreach($types->get() as $type): ?>
-                <option value="<?=$this->e($type->getId())?>"><?=$this->e($type->getAttribute('name'))?></option>
-                <?php endforeach; ?>
-            </select>
+            <?php $this->insert('types-select-list', ['types' => $types, 'selectedTypeId' => 1, 'selectClass' => 'form-control', 'formName' => 'typeid', 'formId' => 'typeid']) ?>
         </div>
     </div>
     <div class="form-group">

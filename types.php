@@ -19,7 +19,7 @@ if (empty($do)) {
         )
     );
     
-    $types = new TypeGroup();
+    $types = new TypeGroup(array(), array(array('column' => 'name', 'direction' => TypeGroup::ORDER_ASC)));
     $types->load();
 
     // page title for template
@@ -41,12 +41,17 @@ if (empty($do)) {
             'description'   =>  array(
                                     'filter'    =>  FILTER_SANITIZE_STRING,
                                     'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
-                                )
+                                ),
+            'parenttypeid'  =>  FILTER_VALIDATE_INT
         )
     );
     
+    // get list of types
+    $types = new TypeGroup(array(), array(array('column' => 'name', 'direction' => TypeGroup::ORDER_ASC)));
+    $types->load();
+    
     if (! count($post)) {
-        echo $templates->render('types-new');
+        echo $templates->render('types-new', ['types' => $types]);
     } else {
         Type::create($post);
         
@@ -90,16 +95,22 @@ if (empty($do)) {
             'description'   =>  array(
                                     'filter'    =>  FILTER_SANITIZE_STRING,
                                     'flags'     =>  FILTER_FLAG_NO_ENCODE_QUOTES
-                                )
+                                ),
+            'parenttypeid'  =>  FILTER_VALIDATE_INT
         )
     );
     
+    // get list of types
+    $types = new TypeGroup(array(), array(array('column' => 'name', 'direction' => TypeGroup::ORDER_ASC)));
+    $types->load();
+    
     if (! count($_POST)) {
-        echo $templates->render('types-edit', ['type' => $type]);
+        echo $templates->render('types-edit', ['type' => $type, 'types' => $types]);
     } else {
         // FIXME: validate
         $type->setAttribute('name', $post['name']);
         $type->setAttribute('description', $post['description']);
+        $type->setAttribute('parenttypeid', $post['parenttypeid']);
         $type->save();
         
         header('Location: types.php?message=editsuccess');

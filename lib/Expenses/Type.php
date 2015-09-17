@@ -8,6 +8,7 @@ class Type extends AbstractSingular
 {
     public static $attributeTypes = array(
         'typeid'        =>  ExpensesPDO::PARAM_INT,
+        'parenttypeid'  =>  ExpensesPDO::PARAM_INT,
         'name'          =>  ExpensesPDO::PARAM_STR,
         'description'   =>  ExpensesPDO::PARAM_STR
     );
@@ -55,6 +56,32 @@ class Type extends AbstractSingular
         
         // commit changes to database
         $db->commit();
+    }
+    
+    public function hasParent() {
+        return ($this->getAttribute('parenttypeid') > 0);
+    }
+    
+    public function getParent() {
+        if (! ($this->hasParent())) {
+            throw new Exception("This type has no parent.");
+        }
+        
+        $parent = new Type($this->getAttribute('parenttypeid'));
+        $parent->load();
+        
+        return $parent;
+    }
+    
+    public function getFullName() {
+        $name = $this->getAttribute('name');
+        
+        if ($this->hasParent()) {
+            // add parent's name before this name            
+            $name = $this->getParent()->getFullName() . " -> " . $name;
+        }
+        
+        return $name;
     }
     
     public function getFormattedDescription() {
