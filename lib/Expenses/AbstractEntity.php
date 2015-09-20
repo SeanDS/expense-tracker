@@ -126,18 +126,12 @@ abstract class AbstractEntity
     }
     
     /**
-     * 
-     * 
-     * From http://stackoverflow.com/questions/19271381/correctly-determine-if-date-string-is-a-valid-date-in-that-format
-     * 
      * @param type $dateString
      * @return type
      */
     public static function validateDateString($dateString)
     {
-        $date = DateTime::createFromFormat(DB_DATE_FORMAT, $dateString);
-        
-        return $date && $date->format(DB_DATE_FORMAT) == $dateString;
+        return (strtotime($dateString));
     }
     
     /**
