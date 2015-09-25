@@ -20,10 +20,10 @@ class IntTree {
         $this->parentIdField = $parentIdField;
     }
     
-    private function getTree() {
+    private function getNestedArray() {
         if (is_null($this->tree)) {
             $refs = array();
-            $tree = array();
+            $this->tree = array();
 
             // sort objects by parentid into tree
             foreach ($this->objects as $object)
@@ -37,16 +37,16 @@ class IntTree {
 
                 if ($parentId == 0)
                 {
-                    $tree[$id] =& $ref;
+                    $this->tree[$id] =& $ref;
                 }
                 else
                 {
                     $refs[$parentId]['children'][$id] =& $ref;
                 }
             }
-        } else {
-            return $this->tree;
         }
+        
+        return $this->tree;
     }
     
     public function getChildrenCount($nodeId) {
@@ -62,10 +62,12 @@ class IntTree {
             throw new Exception("Invalid root id specified.");
         }
         
-        $tree = $this->getTree();
+        $tree = $this->getNestedArray();
         
         if ($nodeId > 0) {
             return $tree[$nodeId];
+        } else {
+            return $tree;
         }
     }
     

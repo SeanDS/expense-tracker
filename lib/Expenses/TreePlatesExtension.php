@@ -16,7 +16,7 @@ class TreePlatesExtension implements ExtensionInterface {
         return $this;
     }
 
-    public function toList(IntTree $tree, $selectedTypeId, $ignoreTypeIds = null, $templates = null) {
+    public function toList(array $tree, $selectedTypeId, $ignoreTypeIds = null, $templates = null) {
         if (is_null($templates)) {
             // make NEW engine using existing templates directory
             $templates = new Engine(Config::TEMPLATE_DIR);
@@ -28,7 +28,7 @@ class TreePlatesExtension implements ExtensionInterface {
         
         $html = "";
         
-        foreach ($tree->getBranches() as $branch) {
+        foreach ($tree as $branch) {
             if (! in_array($branch['type']->getId(), $ignoreTypeIds)) {
                 $html .= $templates->render('types-select-option', ['type' => $branch['type'], 'selectedTypeId' => $selectedTypeId]);
             }
