@@ -33,8 +33,9 @@ class Totals {
         $userTime = new DateTime($user->getCurrentUserDate(), $user->getTimeZone());
 
         // today
-        if ($selectedPeriods && self::PERIOD_TODAY) {        
-            $userMidnight = $userTime->setTime(0, 0, 0);
+        if ($selectedPeriods && self::PERIOD_TODAY) {
+            $userTimeCopy = clone $userTime;
+            $userMidnight = $userTimeCopy->setTime(0, 0, 0);
             
             $todayGroup = new ExpenseGroup(
                 array_merge(
@@ -60,7 +61,8 @@ class Totals {
 
         // last 24 hours
         if ($selectedPeriods && self::PERIOD_LAST_24_HOURS) {
-            $userOneDayAgo = $userTime->sub(new DateInterval('P1D'));
+            $userTimeCopy = clone $userTime;
+            $userOneDayAgo = $userTimeCopy->sub(new DateInterval('P1D'));
             
             $lastDayGroup = new ExpenseGroup(
                 array_merge(
@@ -86,7 +88,8 @@ class Totals {
 
         // last 7 days
         if ($selectedPeriods && self::PERIOD_LAST_7_DAYS) {
-            $userOneWeekAgo = $userTime->sub(new DateInterval('P7D'));
+            $userTimeCopy = clone $userTime;
+            $userOneWeekAgo = $userTimeCopy->sub(new DateInterval('P7D'));
             
             $lastWeekGroup = new ExpenseGroup(
                 array_merge(
@@ -112,10 +115,11 @@ class Totals {
         
         // since start of month
         if ($selectedPeriods && self::PERIOD_SINCE_START_OF_MONTH) {
-            $userStartOfMonth = $userTime->setDate($userTime->format('Y'), $userTime->format('m'), 1);
+            $userTimeCopy = clone $userTime;
+            $userStartOfMonth = $userTimeCopy->setDate($userTime->format('Y'), $userTime->format('m'), 1);
             $userStartOfMonth->setTime(0, 0, 0);
             
-            $lastWeekGroup = new ExpenseGroup(
+            $thisMonthGroup = new ExpenseGroup(
                 array_merge(
                     $this->expenses->getWhereCriteria(),
                     array(
@@ -133,13 +137,14 @@ class Totals {
             
             $totals[] = array(
                 'range'     =>  sprintf('Since %s', $userStartOfMonth->format('jS F')),
-                'amount'    =>  $lastWeekGroup->getTotalExpenses()
+                'amount'    =>  $thisMonthGroup->getTotalExpenses()
             );
         }
 
         // last 30 days
         if ($selectedPeriods && self::PERIOD_LAST_30_DAYS) {
-            $userOneMonthAgo = $userTime->sub(new DateInterval('P30D'));
+            $userTimeCopy = clone $userTime;
+            $userOneMonthAgo = $userTimeCopy->sub(new DateInterval('P30D'));
             
             $lastMonthGroup = new ExpenseGroup(
                 array_merge(
